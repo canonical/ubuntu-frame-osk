@@ -37,15 +37,11 @@ plugs:
 
 apps:
   ubuntu-frame-osk:
-    command-chain: [bin/run-user, bin/check-can-run]
-    command: usr/bin/squeekboard
-
-  wait-for-display:
-    command-chain: [bin/run-user, bin/wait-for-display, bin/check-can-run]
+    command-chain: [bin/run-user]
     command: usr/bin/squeekboard
 
   daemon:
-    command-chain: [bin/run-daemon, bin/run-user, bin/wait-for-display, bin/check-can-run]
+    command-chain: [bin/run-daemon, bin/run-user]
     command: usr/bin/squeekboard
     daemon: simple
     restart-delay: 3s

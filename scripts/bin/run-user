@@ -1,9 +1,29 @@
 #!/bin/sh
-set -eux
+set -eu
 
+# Returns if the first argument starts with the second argument
+starts_with() {
+    case "$1" in
+        "$2"*) return 0;
+    esac;
+    return 1;
+}
+
+# Setup XDG_RUNTIME_DIR
 XDG_RUNTIME_DIR=$(dirname "$XDG_RUNTIME_DIR")
 export XDG_RUNTIME_DIR
 mkdir -p "$XDG_RUNTIME_DIR" -m 700
+echo "XDG_RUNTIME_DIR set to $XDG_RUNTIME_DIR"
+
+if [ -z "$WAYLAND_DISPLAY" ]; then
+    DISPLAY_PATH="$XDG_RUNTIME_DIR/wayland-0"
+elif starts_with "$WAYLAND_DISPLAY" "/"; then
+    # WAYLAND_DISPLAY is absolute path, return it
+    DISPLAY_PATH="$WAYLAND_DISPLAY"
+else
+    # WAYLAND_DISPLAY is a name in XDG_RUNTIME_DIR
+    DISPLAY_PATH="$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"
+fi
 
 # Enable the keyboard
 gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled true
@@ -15,10 +35,41 @@ if [ -e "${osk_layout_file}" ]; then
     osk_layout_option="$(cat "${osk_layout_file}")"
 fi
 if [ -z "${osk_layout_option}" ]; then
+  echo "No keyboard layout specified"
   sources_value="[]"
 else
+  echo "Using keyboard layout ${osk_layout_option}"
   sources_value="$(printf "[('xkb', '%s')]" "${osk_layout_option}")"
 fi
 gsettings set org.gnome.desktop.input-sources sources "${sources_value}"
+
+# Wait for the Wayland display to appear
+if [ ! -e "$DISPLAY_PATH" ]; then
+    echo "Waiting for Wayland display at $DISPLAY_PATH to appear"
+    # We can't wait for a specific file to be created, so instead we wait for
+    # any file in the directory to be created and loop until the display appears
+    while [ ! -e "$DISPLAY_PATH" ]; do
+        inotifywait -e create "$(dirname "$DISPLAY_PATH")"
+    done
+    echo "Wayland display at $DISPLAY_PATH to appeared"
+fi
+
+CONTENT_IFACE="on-screen-keyboard-auth"
+if ! snapctl is-connected "$CONTENT_IFACE"; then
+    printf "%s\n%s\n" \
+        "on-screen-keyboard-auth content interface not connected, you may want to run run:" \
+        "$ sudo snap connect ubuntu-frame:$CONTENT_IFACE ${SNAP_NAME}:$CONTENT_IFACE" 1>&2
+fi
+
+mkdir -p "$SNAP_DATA/osk-auth"
+rm -f "$SNAP_DATA/osk-auth/allow-*"
+touch "$SNAP_DATA/osk-auth/allow-$$"
+
+if ! snapctl is-connected wayland; then
+    printf "Wayland plug not connected, run:\n$ sudo snap connect ${SNAP_NAME}:wayland\n" 1>&2
+    exit 1
+fi
+
+echo "Running OSK on display at $DISPLAY_PATH"
 
 exec "$@"
