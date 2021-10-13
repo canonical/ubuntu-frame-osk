@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
 
+# Returns if the first argument starts with the second argument
 starts_with() {
     case "$1" in
         "$2"*) return 0;

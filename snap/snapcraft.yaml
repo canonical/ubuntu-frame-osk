@@ -26,26 +26,23 @@ layout:
   /usr/share/glib-2.0:
     bind: $SNAP/usr/share/glib-2.0
 
+plugs:
+  wayland:
+
 apps:
   ubuntu-frame-osk:
     command-chain: [bin/run-user, bin/check-can-run]
     command: usr/bin/squeekboard
-    plugs:
-      - wayland
 
   wait-for-display:
     command-chain: [bin/run-user, bin/wait-for-display, bin/check-can-run]
     command: usr/bin/squeekboard
-    plugs:
-      - wayland
 
   daemon:
     command-chain: [bin/run-daemon, bin/run-user, bin/wait-for-display, bin/check-can-run]
     command: usr/bin/squeekboard
     daemon: simple
     restart-delay: 3s
-    plugs:
-      - wayland
 
 parts:
   scripts:
