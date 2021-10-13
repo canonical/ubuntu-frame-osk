@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+
+config_changes=0
+osk_layout_file="$SNAP_DATA/osk-layout.txt"
+
+osk_layout_option="$(snapctl get layout)"
+if [ "$(cat "${osk_layout_file}")" != "${osk_layout_option}" ]; then
+  echo "${osk_layout_option}" > "${osk_layout_file}"
+  let config_changes+=1
+fi
+
