@@ -1,6 +1,10 @@
 #!/bin/sh
 set -eux
 
+XDG_RUNTIME_DIR=$(dirname "$XDG_RUNTIME_DIR")
+export XDG_RUNTIME_DIR
+mkdir -p "$XDG_RUNTIME_DIR" -m 700
+
 # Enable the keyboard
 gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled true
 
