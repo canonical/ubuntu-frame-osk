@@ -33,6 +33,14 @@ apps:
     plugs:
       - wayland
 
+  daemon:
+    command-chain: [bin/run-daemon, bin/run-user]
+    command: usr/bin/squeekboard
+    daemon: simple
+    restart-delay: 3s
+    plugs:
+      - wayland
+
 parts:
   scripts:
     plugin: dump
