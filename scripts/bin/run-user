@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eux
+
+# Enable the keyboard
+gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled true
+
+exec "$@"

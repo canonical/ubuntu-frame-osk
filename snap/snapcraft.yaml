@@ -1,0 +1,104 @@
+name: ubuntu-frame-osk
+summary: On-screen keyboard for Ubuntu Frame, based on Squeekboard
+description: This snap contains the Wayland on-screen keyboard Squeekboard, modified and packaged such that it can run on Ubuntu Frame.
+confinement: strict
+base: core20
+version: git
+license: GPL-3.0
+compression: lzo
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+  - build-on: armhf
+
+layout:
+  /usr/share/X11:
+    bind: $SNAP/usr/share/X11
+  /usr/share/icons:
+    bind: $SNAP/usr/share/icons
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0:
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0
+  /usr/share/mime:
+    bind: $SNAP/usr/share/mime
+  /usr/share/fonts:
+    bind: $SNAP/usr/share/fonts
+  /usr/share/glib-2.0:
+    bind: $SNAP/usr/share/glib-2.0
+
+apps:
+  ubuntu-frame-osk:
+    command-chain: [bin/run-user]
+    command: usr/bin/squeekboard
+    plugs:
+      - wayland
+
+parts:
+  scripts:
+    plugin: dump
+    source: scripts
+
+  libfeedback:
+    # Required by squeekboard because libfeedback-dev isn't in 20.04
+    plugin: meson
+    source: https://source.puri.sm/Librem5/feedbackd.git
+    source-depth: 1
+    meson-parameters: [--prefix, /usr]
+    build-packages:
+      - dbus
+      - libgirepository1.0-dev
+      - libgudev-1.0-dev
+      - libgsound-dev
+      - libjson-glib-dev
+      - valac
+      - libglib2.0-dev
+    stage-packages:
+      - libgudev-1.0-0
+      - libgsound0
+      - libjson-glib-1.0-0
+      - libglib2.0-0
+
+  squeekboard:
+    after: [libfeedback]
+    plugin: meson
+    # source: https://gitlab.gnome.org/World/Phosh/squeekboard.git
+    source: https://gitlab.gnome.org/wmww/squeekboard.git
+    source-branch: snap
+    source-depth: 1
+    meson-parameters: [--prefix, /usr, -Dstrict=false, -Dbuildtype=release]
+    build-packages:
+      - cargo
+      - wayland-protocols
+      - libwayland-dev
+      - libglib2.0-dev
+      - libgnome-desktop-3-dev
+      - libgtk-3-dev
+    stage-packages:
+      - libglib2.0-0
+      - libgnome-desktop-3-19
+      - libgtk-3-0
+    prime:
+      - -usr/bin/squeekboard-test-layout
+
+  gtk-prep:
+    after: [squeekboard, libfeedback]
+    plugin: nil
+    build-packages:
+      - libgdk-pixbuf2.0-0
+      - shared-mime-info
+    stage-packages:
+      - librsvg2-common
+      - gsettings-desktop-schemas
+      - libglib2.0-bin
+    override-build: |
+      # Update mime database
+      update-mime-database ${SNAPCRAFT_PART_INSTALL}/usr/share/mime
+    override-prime: |
+      snapcraftctl prime
+      # Compile the gsettings schemas
+      /usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/glib-2.0/glib-compile-schemas ${SNAPCRAFT_PRIME}/usr/share/glib-2.0/schemas
+      # Index the pixbuf loaders
+      LOADERS_PATH=$(echo ${SNAPCRAFT_PRIME}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/*/loaders)
+      QUERY_LOADERS=/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders
+      GDK_PIXBUF_MODULEDIR=${LOADERS_PATH} ${QUERY_LOADERS} > ${LOADERS_PATH}/../loaders.cache
+      sed s!$SNAPCRAFT_PRIME!!g --in-place ${LOADERS_PATH}/../loaders.cache
