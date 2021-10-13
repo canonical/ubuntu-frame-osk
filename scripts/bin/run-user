@@ -1,6 +1,11 @@
 #!/bin/sh
 set -eux
 
+if ! snapctl is-connected wayland; then
+    printf "Wayland plug not connected, run:\n$ sudo snap connect ${SNAP_NAME}:wayland\n" 1>&2
+    exit 1
+fi
+
 XDG_RUNTIME_DIR=$(dirname "$XDG_RUNTIME_DIR")
 export XDG_RUNTIME_DIR
 mkdir -p "$XDG_RUNTIME_DIR" -m 700
