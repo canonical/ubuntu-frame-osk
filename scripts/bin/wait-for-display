@@ -4,9 +4,21 @@ set -eux
 DISPLAY_PATH=$($SNAP/bin/get-display-path)
 if [ ! -e "$DISPLAY_PATH" ]; then
     echo "Waiting for Wayland display at $DISPLAY_PATH to appear"
+    # We can't wait for a specific file to be created, so instead we wait for
+    # any file in the directory to be created and loop until the display appears
     while [ ! -e "$DISPLAY_PATH" ]; do
         inotifywait -e create "$(dirname "$DISPLAY_PATH")"
     done
 fi
+
+CONTENT_IFACE="on-screen-keyboard-auth"
+if ! snapctl is-connected "$CONTENT_IFACE"; then
+    printf "%s\n%s\n" \
+        "on-screen-keyboard-auth content interface not connected, you may want to run run:" \
+        "$ sudo snap connect ubuntu-frame:$CONTENT_IFACE ${SNAP_NAME}:$CONTENT_IFACE" 1>&2
+fi
+
+mkdir -p "$SNAP_DATA/osk-auth"
+touch "$SNAP_DATA/osk-auth/allow-$$"
 
 exec "$@"
