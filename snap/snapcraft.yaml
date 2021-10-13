@@ -28,13 +28,19 @@ layout:
 
 apps:
   ubuntu-frame-osk:
-    command-chain: [bin/run-user]
+    command-chain: [bin/run-user, bin/check-can-run]
+    command: usr/bin/squeekboard
+    plugs:
+      - wayland
+
+  wait-for-display:
+    command-chain: [bin/run-user, bin/wait-for-display, bin/check-can-run]
     command: usr/bin/squeekboard
     plugs:
       - wayland
 
   daemon:
-    command-chain: [bin/run-daemon, bin/run-user]
+    command-chain: [bin/run-daemon, bin/run-user, bin/wait-for-display, bin/check-can-run]
     command: usr/bin/squeekboard
     daemon: simple
     restart-delay: 3s
@@ -45,6 +51,8 @@ parts:
   scripts:
     plugin: dump
     source: scripts
+    stage-packages:
+      - inotify-tools
 
   libfeedback:
     # Required by squeekboard because libfeedback-dev isn't in 20.04

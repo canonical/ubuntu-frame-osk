@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eux
+
+if ! snapctl is-connected wayland; then
+    printf "Wayland plug not connected, run:\n$ sudo snap connect ${SNAP_NAME}:wayland\n" 1>&2
+    exit 1
+fi
+
+DISPLAY_PATH=$($SNAP/bin/get-display-path)
+if [ ! -e "$DISPLAY_PATH" ]; then
+    printf "No Wayland display at $DISPLAY_PATH\n"
+    exit 1
+fi
+
+exec "$@"

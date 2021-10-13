@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eux
+
+DISPLAY_PATH=$($SNAP/bin/get-display-path)
+if [ ! -e "$DISPLAY_PATH" ]; then
+    echo "Waiting for Wayland display at $DISPLAY_PATH to appear"
+    while [ ! -e "$DISPLAY_PATH" ]; do
+        inotifywait -e create "$(dirname "$DISPLAY_PATH")"
+    done
+fi
+
+exec "$@"
