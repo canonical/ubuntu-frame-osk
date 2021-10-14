@@ -61,9 +61,8 @@ if ! snapctl is-connected "$CONTENT_IFACE"; then
         "$ sudo snap connect ubuntu-frame:$CONTENT_IFACE ${SNAP_NAME}:$CONTENT_IFACE" 1>&2
 fi
 
-mkdir -p "$SNAP_DATA/osk-auth"
-rm -f "$SNAP_DATA/osk-auth/allow-*"
-touch "$SNAP_DATA/osk-auth/allow-$$"
+export AUTH_DIR="$SNAP_DATA/osk-auth"
+mkdir -p "$AUTH_DIR"
 
 if ! snapctl is-connected wayland; then
     printf "Wayland plug not connected, run:\n$ sudo snap connect ${SNAP_NAME}:wayland\n" 1>&2

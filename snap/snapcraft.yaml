@@ -37,11 +37,11 @@ plugs:
 
 apps:
   ubuntu-frame-osk:
-    command-chain: [bin/run-user]
+    command-chain: [bin/run-user, usr/local/bin/pid-registrar]
     command: usr/bin/squeekboard
 
   daemon:
-    command-chain: [bin/run-daemon, bin/run-user]
+    command-chain: [bin/run-daemon, bin/run-user, usr/local/bin/pid-registrar]
     command: usr/bin/squeekboard
     daemon: simple
     restart-delay: 3s
@@ -52,6 +52,10 @@ parts:
     source: scripts
     stage-packages:
       - inotify-tools
+
+  pid-registrar:
+    plugin: cmake
+    source: pid-registrar
 
   libfeedback:
     # Required by squeekboard because libfeedback-dev isn't in 20.04
