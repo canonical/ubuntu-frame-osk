@@ -36,15 +36,13 @@ static void clean_up_file()
     auth_file_exists = 0;
 }
 
-static void handle_sigint(int arg)
+void handle_other_signal(int signum)
 {
-    (void)arg;
     if (child_pid)
     {
         clean_up_file();
-        kill(child_pid, SIGINT);
+        kill(child_pid, signum);
     }
-
 }
 
 static void handle_sigchld()
@@ -74,7 +72,8 @@ int main(int argc, char* const* argv)
     strncpy(auth_dir, auth_dir_value, sizeof(auth_dir));
 
     signal(SIGCHLD, handle_sigchld);
-    signal(SIGINT, handle_sigint);
+    signal(SIGINT, handle_other_signal);
+    signal(SIGTERM, handle_other_signal);
 
     auth_file_exists = 1;
     child_pid = fork();
