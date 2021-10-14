@@ -7,10 +7,11 @@
 const char* auth_dir_env = "AUTH_DIR";
 char auth_dir[256];
 char auth_path[256];
-pid_t child_pid;
+pid_t child_pid = 0;
+int auth_file_exists = 0;
 
 // Result does not need to be freed
-void init_auth_path(pid_t pid)
+static void init_auth_path(pid_t pid)
 {
     int length = snprintf(auth_path, sizeof(auth_path), "%s/allow-%d", auth_dir, pid);
     if (length + 1 >= sizeof(auth_path))
@@ -20,16 +21,38 @@ void init_auth_path(pid_t pid)
     }
 }
 
-void process_sigchld()
+static void clean_up_file()
 {
+    if (!auth_file_exists)
+    {
+        return;
+    }
     init_auth_path(child_pid);
     if (remove(auth_path) < 0)
     {
         fprintf(stderr, "Failed to remove auth file %s", auth_path);
         perror(" ");
     }
+    auth_file_exists = 0;
+}
+
+static void handle_sigint(int arg)
+{
+    (void)arg;
+    if (child_pid)
+    {
+        clean_up_file();
+        kill(child_pid, SIGINT);
+    }
+
+}
+
+static void handle_sigchld()
+{
+    clean_up_file();
     int wstatus = 0;
     waitpid(child_pid, &wstatus, 0);
+    child_pid = 0;
     int return_code = WEXITSTATUS(wstatus);
     exit(return_code);
 }
@@ -50,8 +73,10 @@ int main(int argc, char* const* argv)
     }
     strncpy(auth_dir, auth_dir_value, sizeof(auth_dir));
 
-    signal(SIGCHLD, process_sigchld);
+    signal(SIGCHLD, handle_sigchld);
+    signal(SIGINT, handle_sigint);
 
+    auth_file_exists = 1;
     child_pid = fork();
     switch (child_pid)
     {
