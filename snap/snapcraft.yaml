@@ -31,11 +31,11 @@ plugs:
 
 apps:
   ubuntu-frame-osk:
-    command-chain: [bin/run-user, usr/local/bin/pid-registrar]
+    command-chain: [bin/run-user]
     command: usr/bin/squeekboard
 
   daemon:
-    command-chain: [bin/run-daemon, bin/run-user, usr/local/bin/pid-registrar]
+    command-chain: [bin/run-daemon, bin/run-user]
     command: usr/bin/squeekboard
     daemon: simple
     restart-delay: 3s

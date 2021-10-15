@@ -54,16 +54,6 @@ if [ ! -e "$DISPLAY_PATH" ]; then
     echo "Wayland display at $DISPLAY_PATH to appeared"
 fi
 
-CONTENT_IFACE="on-screen-keyboard-auth"
-if ! snapctl is-connected "$CONTENT_IFACE"; then
-    printf "%s\n%s\n" \
-        "on-screen-keyboard-auth content interface not connected, you may want to run run:" \
-        "$ sudo snap connect ubuntu-frame:$CONTENT_IFACE ${SNAP_NAME}:$CONTENT_IFACE" 1>&2
-fi
-
-export AUTH_DIR="$SNAP_DATA/osk-auth"
-mkdir -p "$AUTH_DIR"
-
 if ! snapctl is-connected wayland; then
     printf "Wayland plug not connected, run:\n$ sudo snap connect ${SNAP_NAME}:wayland\n" 1>&2
     exit 1
