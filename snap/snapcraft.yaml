@@ -26,12 +26,6 @@ layout:
   /usr/share/glib-2.0:
     bind: $SNAP/usr/share/glib-2.0
 
-slots:
-  on-screen-keyboard-auth:
-    interface: content
-    read:
-      - $SNAP_DATA/osk-auth
-
 plugs:
   wayland:
 
