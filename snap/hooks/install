@@ -8,5 +8,8 @@ snapctl stop --disable "$SNAP_INSTANCE_NAME.daemon"
 daemon=$(snapctl get daemon)
 if [ "$daemon" = "" ]
 then
-  snapctl set daemon=true
+  # Set daemon=true on core and daemon=false on classic
+  if grep -q -e snap_core= -e snapd_recovery_mode= /proc/cmdline
+  then snapctl set daemon=true
+  else snapctl set daemon=false
 fi
