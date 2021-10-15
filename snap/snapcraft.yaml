@@ -47,10 +47,6 @@ parts:
     stage-packages:
       - inotify-tools
 
-  pid-registrar:
-    plugin: cmake
-    source: pid-registrar
-
   libfeedback:
     # Required by squeekboard because libfeedback-dev isn't in 20.04
     plugin: meson
