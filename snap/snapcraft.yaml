@@ -6,6 +6,7 @@ base: core20
 version: git
 license: GPL-3.0
 compression: lzo
+grade: devel
 
 architectures:
   - build-on: amd64
