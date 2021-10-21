@@ -6,6 +6,7 @@ base: core20
 version: git
 license: GPL-3.0
 compression: lzo
+grade: devel
 
 architectures:
   - build-on: amd64
@@ -26,24 +27,28 @@ layout:
   /usr/share/glib-2.0:
     bind: $SNAP/usr/share/glib-2.0
 
-plugs:
-  wayland:
-
 apps:
   ubuntu-frame-osk:
-    command-chain: [bin/run-user]
+    command-chain: [bin/wayland-launch, bin/run-user]
     command: usr/bin/squeekboard
+    plugs: [wayland]
 
   daemon:
-    command-chain: [bin/run-daemon, bin/run-user]
+    command-chain: [bin/run-daemon, bin/wayland-launch, bin/run-user]
     command: usr/bin/squeekboard
     daemon: simple
     restart-delay: 3s
+    plugs: [wayland]
 
 parts:
   scripts:
     plugin: dump
     source: scripts
+
+  mir-kiosk-snap-launch:
+    plugin: dump
+    source: https://github.com/MirServer/mir-kiosk-snap-launch.git
+    override-build:  $SNAPCRAFT_PART_BUILD/build-with-plugs.sh wayland
     stage-packages:
       - inotify-tools
 
