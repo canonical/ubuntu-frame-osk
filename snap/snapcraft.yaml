@@ -13,9 +13,26 @@ architectures:
   - build-on: arm64
   - build-on: armhf
 
+plugs:
+  graphics-core20:
+    interface: content
+    target: $SNAP/graphics
+    default-provider: mesa-core20
+
+environment:
+  # Graphics from graphics-core20
+  LD_LIBRARY_PATH:    $SNAP/graphics/lib
+  LIBGL_DRIVERS_PATH: $SNAP/graphics/dri
+  LIBVA_DRIVERS_PATH: $SNAP/graphics/dri
+  __EGL_VENDOR_LIBRARY_DIRS: $SNAP/graphics/glvnd/egl_vendor.d
+  # XKB config from snap
+  XKB_CONFIG_ROOT: $SNAP/usr/share/X11/xkb
+
 layout:
-  /usr/share/X11:
-    bind: $SNAP/usr/share/X11
+  /usr/share/libdrm:  # Needed by mesa-core20 on AMD GPUs
+    bind: $SNAP/graphics/libdrm
+  /usr/share/drirc.d:  # Used by mesa-core20 for app specific workarounds
+    bind: $SNAP/graphics/drirc.d
   /usr/share/icons:
     bind: $SNAP/usr/share/icons
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0:
@@ -34,10 +51,11 @@ apps:
     plugs: [wayland]
 
   daemon:
-    command-chain: [bin/run-daemon, bin/wayland-launch, bin/run-user]
+    command-chain: [bin/wayland-launch, bin/run-user]
     command: usr/bin/squeekboard
     daemon: simple
     restart-delay: 3s
+    restart-condition: always
     plugs: [wayland]
 
 parts:
@@ -51,6 +69,8 @@ parts:
     override-build:  $SNAPCRAFT_PART_BUILD/build-with-plugs.sh wayland
     stage-packages:
       - inotify-tools
+    prime:
+      - -bin/run-daemon
 
   libfeedback:
     # Required by squeekboard because libfeedback-dev isn't in 20.04
@@ -116,3 +136,25 @@ parts:
       QUERY_LOADERS=/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders
       GDK_PIXBUF_MODULEDIR=${LOADERS_PATH} ${QUERY_LOADERS} > ${LOADERS_PATH}/../loaders.cache
       sed s!$SNAPCRAFT_PRIME!!g --in-place ${LOADERS_PATH}/../loaders.cache
+
+  cleanup:
+    after: [gtk-prep, mir-kiosk-snap-launch]
+    plugin: nil
+    build-snaps: [ mesa-core20 ]
+    override-prime: |
+      set -eux
+      cd /snap/mesa-core20/current/egl/lib
+      find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/{} \;
+      rm -fr "$SNAPCRAFT_PRIME/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri"
+      for CRUFT in bug drirc.d glvnd libdrm lintian man; do
+        rm -rf "$SNAPCRAFT_PRIME/usr/share/$CRUFT"
+      done
+
+  more-cleanup:
+    after: [cleanup]
+    plugin: nil
+    override-prime: |
+      set -eux
+      for CRUFT in alsa dbus-1 help apport doc doc-base pkgconfig thumbnailers bash-completion feedbackd gir-1.0 libthai sounds xml; do
+        rm -rf "$SNAPCRAFT_PRIME/usr/share/$CRUFT"
+      done
