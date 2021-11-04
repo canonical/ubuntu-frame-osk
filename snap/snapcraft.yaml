@@ -51,10 +51,11 @@ apps:
     plugs: [wayland]
 
   daemon:
-    command-chain: [bin/run-daemon, bin/wayland-launch, bin/run-user]
+    command-chain: [bin/wayland-launch, bin/run-user]
     command: usr/bin/squeekboard
     daemon: simple
     restart-delay: 3s
+    restart-condition: always
     plugs: [wayland]
 
 parts:
@@ -68,6 +69,8 @@ parts:
     override-build:  $SNAPCRAFT_PART_BUILD/build-with-plugs.sh wayland
     stage-packages:
       - inotify-tools
+    prime:
+      - -bin/run-daemon
 
   libfeedback:
     # Required by squeekboard because libfeedback-dev isn't in 20.04
