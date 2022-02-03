@@ -110,6 +110,14 @@ parts:
       snapcraftctl pull
       git apply ${SNAPCRAFT_STAGE}/squeekboard-patches/*
     meson-parameters: [--prefix, /usr, -Dstrict=false, -Dbuildtype=release]
+    override-build: |
+      snapcraftctl build
+      # Generate a list of keyboard layouts
+      mkdir -p ${SNAPCRAFT_PART_INSTALL}/etc
+      ls ${SNAPCRAFT_PART_SRC}/data/keyboards/ \
+        | grep -Po '^[a-zA-Z\+]+(?=.*\.yaml$)' \
+        | sort | uniq \
+        >${SNAPCRAFT_PART_INSTALL}/etc/layouts.txt
     build-packages:
       - cargo
       - wayland-protocols
