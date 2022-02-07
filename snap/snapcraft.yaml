@@ -92,13 +92,21 @@ parts:
       - libjson-glib-1.0-0
       - libglib2.0-0
 
+  squeekboard-patches:
+    plugin: dump
+    source: patches
+    prime:
+      - -squeekboard-patches
+
   squeekboard:
-    after: [libfeedback]
+    after: [libfeedback, squeekboard-patches]
     plugin: meson
-    # source: https://gitlab.gnome.org/World/Phosh/squeekboard.git
-    source: https://gitlab.gnome.org/wmww/squeekboard.git
-    source-branch: snap
+    source: https://gitlab.gnome.org/World/Phosh/squeekboard.git
+    source-tag: v1.16.0
     source-depth: 1
+    override-pull: |
+      snapcraftctl pull
+      git apply ${SNAPCRAFT_STAGE}/squeekboard-patches/*
     meson-parameters: [--prefix, /usr, -Dstrict=false, -Dbuildtype=release]
     build-packages:
       - cargo

@@ -1,0 +1,24 @@
+From b8a0c5362d0e9287824334495ff93c0a4c244cfa Mon Sep 17 00:00:00 2001
+From: William Wold <wm@wmww.sh>
+Date: Tue, 12 Oct 2021 08:45:08 -0700
+Subject: [PATCH 2/2] Remove -Werror=redundant-decls
+
+---
+ meson.build | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 342ecca..ba3afa0 100644
+--- a/meson.build
++++ b/meson.build
+@@ -19,7 +19,6 @@ add_project_arguments(
+     '-Werror=missing-field-initializers',
+     '-Werror=incompatible-pointer-types',
+     '-Werror=int-conversion',
+-    '-Werror=redundant-decls',
+     '-Werror=parentheses',
+     '-Wformat-nonliteral',
+     '-Wformat-security',
+-- 
+2.30.2
+
