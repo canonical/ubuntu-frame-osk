@@ -14,13 +14,11 @@ fi
 osk_theme_option="$(snapctl get theme)"
 osk_gtk_theme=''
 case "${osk_theme_option}" in
-  '') osk_gtk_theme='Adwaita';;
-  light) osk_gtk_theme='Adwaita';;
-  dark) osk_gtk_theme='Adwaita-dark';;
-  *)
-    echo "Error: invalid theme option ${osk_theme_option}, should be 'light' or 'dark'" >&2
-    exit 1
-    ;;
+  '')     osk_gtk_theme='Yaru-light';;
+  light)  osk_gtk_theme='Yaru-light';;
+  dark)   osk_gtk_theme='Yaru-dark';;
+  *)      echo "Error: invalid theme option ${osk_theme_option}, should be 'light' or 'dark'" >&2
+          exit 1;;
 esac
 if [ "$(cat "${osk_gtk_theme_file}")" != "${osk_gtk_theme}" ]; then
   echo "${osk_gtk_theme}" > "${osk_gtk_theme_file}"

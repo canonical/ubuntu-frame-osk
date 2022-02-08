@@ -121,8 +121,7 @@ parts:
       - libglib2.0-0
       - libgnome-desktop-3-19
       - libgtk-3-0
-      # for the Adwaita-dark theme
-      - gnome-themes-extra-data
+      - yaru-theme-gtk
     prime:
       - -usr/bin/squeekboard-test-layout
 
