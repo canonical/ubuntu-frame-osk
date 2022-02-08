@@ -145,8 +145,13 @@ parts:
       GDK_PIXBUF_MODULEDIR=${LOADERS_PATH} ${QUERY_LOADERS} > ${LOADERS_PATH}/../loaders.cache
       sed s!$SNAPCRAFT_PRIME!!g --in-place ${LOADERS_PATH}/../loaders.cache
 
+  fonts:
+    plugin: nil
+    stage-packages:
+      - fonts-recommended
+
   cleanup:
-    after: [gtk-prep, mir-kiosk-snap-launch]
+    after: [gtk-prep, mir-kiosk-snap-launch, fonts]
     plugin: nil
     build-snaps: [ mesa-core20 ]
     override-prime: |
