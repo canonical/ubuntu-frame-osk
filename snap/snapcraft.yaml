@@ -35,6 +35,8 @@ layout:
     bind: $SNAP/graphics/drirc.d
   /usr/share/icons:
     bind: $SNAP/usr/share/icons
+  /usr/share/themes:
+    bind: $SNAP/usr/share/themes
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0:
     bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0
   /usr/share/mime:
@@ -119,6 +121,8 @@ parts:
       - libglib2.0-0
       - libgnome-desktop-3-19
       - libgtk-3-0
+      # for the Adwaita-dark theme
+      - gnome-themes-extra-data
     prime:
       - -usr/bin/squeekboard-test-layout
 

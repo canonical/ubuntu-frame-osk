@@ -4,6 +4,12 @@ set -eu
 # Enable the keyboard
 gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled true
 
+# Set the GTK theme
+osk_gtk_theme_file="$SNAP_DATA/osk-gtk-theme.txt"
+if test -f "$osk_gtk_theme_file"; then
+  gsettings set org.gnome.desktop.interface gtk-theme "$(cat "$osk_gtk_theme_file")"
+fi
+
 # Set the keyboard layout
 osk_layout_file="$SNAP_DATA/osk-layout.txt"
 osk_layout_option=""
