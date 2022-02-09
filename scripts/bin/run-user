@@ -5,26 +5,13 @@ set -eu
 gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled true
 
 # Set the GTK theme
-osk_gtk_theme_file="$SNAP_DATA/osk-gtk-theme.txt"
-if test -f "$osk_gtk_theme_file"; then
-  gsettings set org.gnome.desktop.interface gtk-theme "$(cat "$osk_gtk_theme_file")"
-fi
+osk_gtk_theme="$(cat "$SNAP_DATA/osk-gtk-theme.txt")"
+gsettings set org.gnome.desktop.interface gtk-theme "$osk_gtk_theme"
 
 # Set the keyboard layout
-osk_layout_file="$SNAP_DATA/osk-layout.txt"
 all_layouts="$(cat "$SNAP/etc/layouts.txt")"
-osk_layout_option=""
-
-if test -e "$osk_layout_file"; then
-  osk_layout_option="$(cat "$osk_layout_file")"
-fi
-
-if test -z "$osk_layout_option"; then
-  echo "No keyboard layout specified, defaulting to us"
-  osk_layout_option='us'
-else
-  echo "Using keyboard layout $osk_layout_option"
-fi
+osk_layout_option="$(cat "$SNAP_DATA/osk-layout.txt")"
+echo "Using keyboard layout $osk_layout_option"
 
 # Move $osk_layout_option the the top of the list
 all_layouts="$(echo "$all_layouts" | sed "s/^$osk_layout_option$//g")"
