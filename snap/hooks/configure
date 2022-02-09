@@ -3,10 +3,25 @@ set -euo pipefail
 
 config_changes=0
 osk_layout_file="$SNAP_DATA/osk-layout.txt"
+osk_gtk_theme_file="$SNAP_DATA/osk-gtk-theme.txt"
 
 osk_layout_option="$(snapctl get layout)"
 if [ "$(cat "${osk_layout_file}")" != "${osk_layout_option}" ]; then
   echo "${osk_layout_option}" > "${osk_layout_file}"
+  let config_changes+=1
+fi
+
+osk_theme_option="$(snapctl get theme)"
+osk_gtk_theme=''
+case "${osk_theme_option}" in
+  '')     osk_gtk_theme='Yaru-light';;
+  light)  osk_gtk_theme='Yaru-light';;
+  dark)   osk_gtk_theme='Yaru-dark';;
+  *)      echo "Error: invalid theme option ${osk_theme_option}, should be 'light' or 'dark'" >&2
+          exit 1;;
+esac
+if [ "$(cat "${osk_gtk_theme_file}")" != "${osk_gtk_theme}" ]; then
+  echo "${osk_gtk_theme}" > "${osk_gtk_theme_file}"
   let config_changes+=1
 fi
 
