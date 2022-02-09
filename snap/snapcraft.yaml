@@ -41,7 +41,7 @@ layout:
     bind: $SNAP/usr/share/mime
   /usr/share/fonts:
     bind: $SNAP/usr/share/fonts
-  /etc/fonts:
+  /etc/fonts: # Without this emojis don't look right
     bind: $SNAP/etc/fonts
   /usr/share/glib-2.0:
     bind: $SNAP/usr/share/glib-2.0
