@@ -148,7 +148,7 @@ parts:
   fonts:
     plugin: nil
     stage-packages:
-      - fonts-recommended
+      - fonts-noto-color-emoji
 
   cleanup:
     after: [gtk-prep, mir-kiosk-snap-launch, fonts]
