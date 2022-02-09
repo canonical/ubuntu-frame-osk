@@ -9,22 +9,9 @@ osk_gtk_theme="$(cat "$SNAP_DATA/osk-gtk-theme.txt")"
 gsettings set org.gnome.desktop.interface gtk-theme "$osk_gtk_theme"
 
 # Set the keyboard layout
-all_layouts="$(cat "$SNAP/etc/layouts.txt")"
 osk_layout_option="$(cat "$SNAP_DATA/osk-layout.txt")"
-echo "Using keyboard layout $osk_layout_option"
-
-# Move $osk_layout_option the the top of the list
-all_layouts="$(echo "$all_layouts" | sed "s/^$osk_layout_option$//g")"
-all_layouts="$(printf "%s\n%s" "$osk_layout_option" "$all_layouts")"
-
-sources_value="$(echo "$all_layouts" | while read layout; do
-  if test ! -z "$layout"; then
-    printf "('xkb', '%s')," "$layout"
-  fi
-done)"
-# Strip final comma and add braces
-sources_value="[$(echo "$sources_value" | sed 's/,$//')]"
-
+sources_value="[('xkb', '$(echo "$osk_layout_option" | sed -s "s/,/'), ('xkb', '/g")')]"
+echo "Setting input sources to $sources_value"
 gsettings set org.gnome.desktop.input-sources sources "$sources_value"
 
 exec "$@"
