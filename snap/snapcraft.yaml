@@ -60,6 +60,9 @@ apps:
     restart-condition: always
     plugs: [wayland]
 
+  list-layouts:
+    command: usr/bin/list-layouts
+
 parts:
   scripts:
     plugin: dump
@@ -73,6 +76,14 @@ parts:
       - inotify-tools
     prime:
       - -bin/run-daemon
+
+  list-layouts:
+    source: list-layouts
+    plugin: meson
+    build-packages:
+      - libgnome-desktop-3-dev
+    stage-packages:
+      - libgnome-desktop-3-19
 
   libfeedback:
     # Required by squeekboard because libfeedback-dev isn't in 20.04
