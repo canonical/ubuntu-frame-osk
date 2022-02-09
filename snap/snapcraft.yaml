@@ -43,6 +43,8 @@ layout:
     bind: $SNAP/usr/share/mime
   /usr/share/fonts:
     bind: $SNAP/usr/share/fonts
+  /etc/fonts: # Without this emojis don't look right
+    bind: $SNAP/etc/fonts
   /usr/share/glib-2.0:
     bind: $SNAP/usr/share/glib-2.0
 
@@ -148,8 +150,13 @@ parts:
       GDK_PIXBUF_MODULEDIR=${LOADERS_PATH} ${QUERY_LOADERS} > ${LOADERS_PATH}/../loaders.cache
       sed s!$SNAPCRAFT_PRIME!!g --in-place ${LOADERS_PATH}/../loaders.cache
 
+  fonts:
+    plugin: nil
+    stage-packages:
+      - fonts-noto-color-emoji
+
   cleanup:
-    after: [gtk-prep, mir-kiosk-snap-launch]
+    after: [gtk-prep, mir-kiosk-snap-launch, fonts]
     plugin: nil
     build-snaps: [ mesa-core20 ]
     override-prime: |
