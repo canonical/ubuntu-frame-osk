@@ -41,6 +41,8 @@ layout:
     bind: $SNAP/usr/share/mime
   /usr/share/fonts:
     bind: $SNAP/usr/share/fonts
+  /etc/fonts:
+    bind: $SNAP/etc/fonts
   /usr/share/glib-2.0:
     bind: $SNAP/usr/share/glib-2.0
 
