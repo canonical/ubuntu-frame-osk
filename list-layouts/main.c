@@ -39,6 +39,7 @@ void print_layout(GnomeXkbInfo* info, const char* layout) {
 }
 
 void print_layouts(GnomeXkbInfo* info, const char* layout_buf) {
+    printf("%-14s%s\n\n", "ID", "NAME");
     int line_start = 0;
     for (int i = 0; layout_buf[i]; i++) {
         if (layout_buf[i] == '\n') {
@@ -54,6 +55,10 @@ void print_layouts(GnomeXkbInfo* info, const char* layout_buf) {
             line_start = i + 1;
         }
     }
+    printf(
+        "\nRun `snap set %s layout=id1,id2,id3` to set layouts\n",
+        getenv("SNAP_NAME")
+    );
 }
 
 void g_log_ignore (
