@@ -50,7 +50,7 @@ layout:
 
 apps:
   ubuntu-frame-osk:
-    command-chain: &_command-chain [bin/wayland-launch, bin/run-user]
+    command-chain: &_command-chain [bin/wayland-launch, bin/run-user, usr/local/bin/snapcraft-preload]
     command: &_command usr/bin/squeekboard
     plugs: &_plugs [wayland]
 
@@ -69,6 +69,14 @@ parts:
   scripts:
     plugin: dump
     source: scripts
+
+  snapcraft-preload:
+    source: https://github.com/sergiusens/snapcraft-preload.git
+    plugin: cmake
+    build-packages:
+      - on amd64:
+        - gcc-multilib
+        - g++-multilib
 
   # Some utility scripts for setting up the Wayland environment
   wayland-launch:
