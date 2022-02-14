@@ -50,17 +50,17 @@ layout:
 
 apps:
   ubuntu-frame-osk:
-    command-chain: [bin/wayland-launch, bin/run-user]
-    command: usr/bin/squeekboard
-    plugs: [wayland]
+    command-chain: &_command-chain [bin/wayland-launch, bin/run-user]
+    command: &_command usr/bin/squeekboard
+    plugs: &_plugs [wayland]
 
   daemon:
-    command-chain: [bin/wayland-launch, bin/run-user]
-    command: usr/bin/squeekboard
     daemon: simple
     restart-delay: 3s
     restart-condition: always
-    plugs: [wayland]
+    command-chain: *_command-chain
+    command: *_command
+    plugs: *_plugs
 
 parts:
   scripts:
