@@ -52,7 +52,7 @@ layout:
 
 apps:
   ubuntu-frame-osk:
-    command-chain: &_command-chain [bin/wayland-launch, bin/run-user]
+    command-chain: &_command-chain [bin/wayland-launch, bin/run-user, bin/anon-shm-preload]
     command: &_command usr/bin/squeekboard
     plugs: &_plugs [wayland]
 
@@ -80,6 +80,10 @@ parts:
   scripts:
     plugin: dump
     source: scripts
+
+  anon-shm-preload:
+        source: https://github.com/MirServer/anon-shm-preload.git
+        plugin: cmake
 
   # Some utility scripts for setting up the Wayland environment
   wayland-launch:
