@@ -67,14 +67,21 @@ parts:
     plugin: dump
     source: scripts
 
-  mir-kiosk-snap-launch:
+  # Some utility scripts for setting up the Wayland environment
+  wayland-launch:
     plugin: dump
-    source: https://github.com/MirServer/mir-kiosk-snap-launch.git
-    override-build:  $SNAPCRAFT_PART_BUILD/build-with-plugs.sh wayland
+    source: wayland-launch
+    override-build: |
+      # The plugs needed to run Wayland. (wayland-launch checks them, setup.sh connects them)
+      # You may add further plugs here if you want these options
+      PLUGS="wayland graphics-core20"
+      sed --in-place "s/%PLUGS%/$PLUGS/g" $SNAPCRAFT_PART_BUILD/bin/wayland-launch
+      sed --in-place "s/%PLUGS%/$PLUGS/g" $SNAPCRAFT_PART_BUILD/bin/setup.sh
+      sed --in-place "s/%SNAP%/$SNAPCRAFT_PROJECT_NAME/g" $SNAPCRAFT_PART_BUILD/bin/wayland-launch
+      sed --in-place "s/%SNAP%/$SNAPCRAFT_PROJECT_NAME/g" $SNAPCRAFT_PART_BUILD/bin/setup.sh
+      snapcraftctl build
     stage-packages:
       - inotify-tools
-    prime:
-      - -bin/run-daemon
 
   libfeedback:
     # Required by squeekboard because libfeedback-dev isn't in 20.04
@@ -156,7 +163,7 @@ parts:
       - fonts-noto-color-emoji
 
   cleanup:
-    after: [gtk-prep, mir-kiosk-snap-launch, fonts]
+    after: [gtk-prep, wayland-launch, fonts]
     plugin: nil
     build-snaps: [ mesa-core20 ]
     override-prime: |

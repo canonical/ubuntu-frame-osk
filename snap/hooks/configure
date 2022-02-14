@@ -14,7 +14,6 @@ fi
 osk_theme_option="$(snapctl get theme)"
 osk_gtk_theme=''
 case "${osk_theme_option}" in
-  '')     osk_gtk_theme='Yaru-light';;
   light)  osk_gtk_theme='Yaru-light';;
   dark)   osk_gtk_theme='Yaru-dark';;
   *)      echo "Error: invalid theme option ${osk_theme_option}, should be 'light' or 'dark'" >&2
