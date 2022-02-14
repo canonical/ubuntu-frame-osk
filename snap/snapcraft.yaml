@@ -62,6 +62,9 @@ apps:
     command: *_command
     plugs: *_plugs
 
+  list-layouts:
+    command: usr/bin/list-layouts
+
 parts:
   scripts:
     plugin: dump
@@ -75,6 +78,14 @@ parts:
       - inotify-tools
     prime:
       - -bin/run-daemon
+
+  list-layouts:
+    source: list-layouts
+    plugin: meson
+    build-packages:
+      - libgnome-desktop-3-dev
+    stage-packages:
+      - libgnome-desktop-3-19
 
   libfeedback:
     # Required by squeekboard because libfeedback-dev isn't in 20.04
@@ -112,6 +123,14 @@ parts:
       snapcraftctl pull
       git apply ${SNAPCRAFT_STAGE}/squeekboard-patches/*
     meson-parameters: [--prefix, /usr, -Dstrict=false, -Dbuildtype=release]
+    override-build: |
+      snapcraftctl build
+      # Generate a list of keyboard layouts
+      mkdir -p ${SNAPCRAFT_PART_INSTALL}/etc
+      ls ${SNAPCRAFT_PART_SRC}/data/keyboards/ \
+        | grep -Po '^[a-zA-Z\+]+(?=.*\.yaml$)' \
+        | sort | uniq \
+        >${SNAPCRAFT_PART_INSTALL}/etc/layouts.txt
     build-packages:
       - cargo
       - wayland-protocols
