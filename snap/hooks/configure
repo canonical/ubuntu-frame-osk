@@ -34,12 +34,19 @@ if [ "$(cat "${osk_gtk_theme_file}")" != "${osk_gtk_theme}" ]; then
 fi
 
 # (Re)start the daemon
-if [ "$(snapctl get daemon)" = "true" ]; then
-  if snapctl services "$SNAP_INSTANCE_NAME.daemon" | grep -q inactive; then
-    snapctl start --enable "$SNAP_INSTANCE_NAME.daemon" 2>&1 || true
-  elif [ $config_changes -gt 0 ]; then
-    snapctl restart "$SNAP_INSTANCE_NAME.daemon" || true
-  fi
-else
-  snapctl stop --disable "$SNAP_INSTANCE_NAME.daemon" 2>&1 || true
-fi
+case "$(snapctl get daemon)" in
+  true)
+    if snapctl services "$SNAP_INSTANCE_NAME.daemon" | grep -q inactive; then
+      snapctl start --enable "$SNAP_INSTANCE_NAME.daemon" 2>&1 || true
+    elif [ $config_changes -gt 0 ]; then
+      snapctl restart "$SNAP_INSTANCE_NAME.daemon" || true
+    fi
+    ;;
+  false)
+    snapctl stop --disable "$SNAP_INSTANCE_NAME.daemon" 2>&1 || true
+    ;;
+  *)
+    echo "Error: invalid daemon option, should be 'true' or 'false'" >&2
+    exit 1
+    ;;
+esac
