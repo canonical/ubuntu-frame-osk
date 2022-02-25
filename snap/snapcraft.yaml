@@ -3,7 +3,7 @@ summary: On-screen keyboard for Ubuntu Frame, based on Squeekboard
 description: This snap contains the Wayland on-screen keyboard Squeekboard, modified and packaged such that it can run on Ubuntu Frame.
 confinement: strict
 base: core20
-version: git
+adopt-info: squeekboard
 license: GPL-3.0
 compression: lzo
 grade: stable
@@ -66,6 +66,15 @@ apps:
     command: usr/bin/list-layouts
 
 parts:
+  recipe-version:
+    plugin: nil
+    source: .
+    source-type: git
+    override-build: |
+      git rev-list --count HEAD > $SNAPCRAFT_PART_INSTALL/recipe-version
+    prime:
+      - -recipe-version
+
   scripts:
     plugin: dump
     source: scripts
@@ -121,7 +130,7 @@ parts:
       - -squeekboard-patches
 
   squeekboard:
-    after: [libfeedback, squeekboard-patches]
+    after: [libfeedback, squeekboard-patches, recipe-version]
     plugin: meson
     source: https://gitlab.gnome.org/World/Phosh/squeekboard.git
     source-tag: v1.16.0
@@ -129,6 +138,8 @@ parts:
     override-pull: |
       snapcraftctl pull
       git apply ${SNAPCRAFT_STAGE}/squeekboard-patches/*
+      recipe_version=`cat $SNAPCRAFT_STAGE/recipe-version`
+      snapcraftctl set-version $recipe_version-squeekboard-`git describe`
     meson-parameters: [--prefix, /usr, -Dstrict=false, -Dbuildtype=release]
     override-build: |
       snapcraftctl build
