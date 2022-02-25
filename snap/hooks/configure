@@ -13,11 +13,15 @@ if [ -z "${osk_layout_option}" ]; then
   snapctl set "layout=${default_layout_option}"
   osk_layout_option="${default_layout_option}"
 fi
-if ! grep -P '^'"$osk_layout_option"'$' "$layout_list_file" >/dev/null; then
-    echo "Error: ${osk_layout_option} is not a valid layout ID." >&2
-    echo "       See $SNAP_NAME.list-layouts for a list of valid layouts." >&2
-    exit 1
-fi
+# Loop through comma-separated list of layouts
+for layout in $(echo "$osk_layout_option" | sed 's/,/ /g'); do
+    # If any layout is not in the layout list, error
+    if ! grep -P '^'"$layout"'$' "$layout_list_file" >/dev/null; then
+        echo "Error: $layout is not a valid layout ID." >&2
+        echo "       See $SNAP_NAME.list-layouts for a list of valid layouts." >&2
+        exit 1
+    fi
+done
 if [ "$(cat "${osk_layout_file}")" != "${osk_layout_option}" ]; then
   echo "${osk_layout_option}" > "${osk_layout_file}"
   let config_changes+=1
