@@ -16,7 +16,7 @@ fi
 # Loop through comma-separated list of layouts
 for layout in $(echo "$osk_layout_option" | sed 's/,/ /g'); do
     # If any layout is not in the layout list, error
-    if ! grep -P '^'"$layout"'$' "$layout_list_file" >/dev/null; then
+    if ! grep -Fx "$layout" "$layout_list_file" >/dev/null; then
         echo "Error: $layout is not a valid layout ID." >&2
         echo "       See $SNAP_NAME.list-layouts for a list of valid layouts." >&2
         exit 1
