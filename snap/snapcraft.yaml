@@ -191,6 +191,7 @@ parts:
     plugin: nil
     stage-packages:
       - fonts-noto-color-emoji
+      - fonts-freefont-ttf
 
   cleanup:
     after: [gtk-prep, wayland-launch, fonts]
