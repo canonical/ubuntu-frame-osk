@@ -43,6 +43,8 @@ layout:
     bind: $SNAP/usr/share/mime
   /usr/share/fonts:
     bind: $SNAP/usr/share/fonts
+  /usr/share/xml:
+    bind: $SNAP/usr/share/xml
   /etc/fonts: # Without this emojis don't look right
     bind: $SNAP/etc/fonts
   /usr/share/glib-2.0:
@@ -161,6 +163,7 @@ parts:
       - libgnome-desktop-3-19
       - libgtk-3-0
       - yaru-theme-gtk
+      - iso-codes
     prime:
       - -usr/bin/squeekboard-test-layout
 
@@ -212,4 +215,4 @@ parts:
     override-prime: |
       set -eux
       cd "$SNAPCRAFT_PRIME/usr/share"
-      rm -rf alsa dbus-1 help apport doc doc-base pkgconfig thumbnailers bash-completion feedbackd gir-1.0 libthai sounds xml
+      rm -rf alsa dbus-1 help apport doc doc-base pkgconfig thumbnailers bash-completion feedbackd gir-1.0 libthai sounds
