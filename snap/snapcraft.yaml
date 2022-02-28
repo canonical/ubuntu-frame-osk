@@ -192,6 +192,7 @@ parts:
     stage-packages:
       - fonts-noto-color-emoji
       - fonts-freefont-ttf
+      - fonts-droid-fallback
 
   cleanup:
     after: [gtk-prep, wayland-launch, fonts]
