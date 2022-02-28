@@ -22,8 +22,9 @@ for layout in $(snapctl get layout | sed 's/,/ /g'); do
   # No "else": we can't output any diagnostics without failing install/refresh
   fi
 done
-if [ -n "${osk_layout_option}" ]; then
-  snapctl set layout="${osk_layout_option}"
+if [ -z "${osk_layout_option}" ]; then
+  osk_layout_option=us
 fi
+snapctl set layout="${osk_layout_option}"
 
 [ "$(snapctl get theme)" != "" ]  || snapctl set theme=light
