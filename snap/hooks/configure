@@ -1,37 +1,16 @@
 #!/bin/bash
 set -euo pipefail
 
+source common
+
 config_changes=0
-default_layout_option="us"
 default_theme_option="light"
-layout_list_file="$SNAP/etc/layouts.txt"
-osk_layout_file="$SNAP_DATA/osk-layout.txt"
 osk_gtk_theme_file="$SNAP_DATA/osk-gtk-theme.txt"
 
-osk_layout_option=""
-# Loop through list of layouts ensuring entries are valid and comma separated
-for layout in $(snapctl get layout | sed 's/,/ /g'); do
-  if grep -Fx "$layout" "$layout_list_file" >/dev/null; then
-    if [ -n "${osk_layout_option}" ]; then
-      osk_layout_option="$osk_layout_option,$layout"
-    else
-      osk_layout_option="$layout"
-    fi
-  else
-    echo "Error: $layout is not a valid layout ID." >&2
-    echo "       See $SNAP_NAME.list-layouts for a list of valid layouts." >&2
-    exit 1
-  fi
-done
-if [ -z "${osk_layout_option}" ]; then
-  snapctl set "layout=${default_layout_option}"
-  osk_layout_option="${default_layout_option}"
-else
-  snapctl set layout="${osk_layout_option}"
-fi
+osk_layouts=( $( validate_layouts ) )
+layouts_changed="$( set_layouts "${osk_layouts[@]}" )"
 
-if [ "$(cat "${osk_layout_file}")" != "${osk_layout_option}" ]; then
-  echo "${osk_layout_option}" > "${osk_layout_file}"
+if [ "${layouts_changed}" == "yes" ]; then
   let config_changes+=1
 fi
 

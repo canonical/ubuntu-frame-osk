@@ -9,22 +9,10 @@ then
   fi
 fi
 
-layout_list_file="$SNAP/etc/layouts.txt"
-osk_layout_option=""
-# Loop through list of layouts dropping invalid entries
-for layout in $(snapctl get layout | sed 's/,/ /g'); do
-  if grep -Fx "$layout" "$layout_list_file" >/dev/null; then
-    if [ -n "${osk_layout_option}" ]; then
-      osk_layout_option="$osk_layout_option,$layout"
-    else
-      osk_layout_option="$layout"
-    fi
-  # No "else": we can't output any diagnostics without failing install/refresh
-  fi
-done
-if [ -z "${osk_layout_option}" ]; then
-  osk_layout_option=us
-fi
-snapctl set layout="${osk_layout_option}"
+source common
+
+# Ignore validation errors, otherwise install/refresh breaks
+osk_layouts=( $( validate_layouts || /bin/true ) )
+set_layouts "${osk_layouts[@]}"
 
 [ "$(snapctl get theme)" != "" ]  || snapctl set theme=light
