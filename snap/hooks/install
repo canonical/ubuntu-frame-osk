@@ -9,7 +9,7 @@ then
   fi
 fi
 
-source common
+source "${SNAP}/snap/local/common"
 
 # Ignore validation errors, otherwise install/refresh breaks
 osk_layouts=( $( validate_layouts || /bin/true ) )
