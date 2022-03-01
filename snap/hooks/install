@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -x
 
 if [ "$(snapctl get daemon)" = "" ]
@@ -9,7 +9,7 @@ then
   fi
 fi
 
-source "${SNAP}/snap/local/common"
+source "${SNAP}/include/hook-common"
 
 # Ignore validation errors, otherwise install/refresh breaks
 osk_layouts=( $( validate_layouts || /bin/true ) )
