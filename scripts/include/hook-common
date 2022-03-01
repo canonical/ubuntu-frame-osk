@@ -29,9 +29,9 @@ function validate_layouts {
 function set_layouts {
   local osk_layouts
   if [ "$#" -gt 0 ]; then
-    osk_layouts="${default_layouts}"
+    osk_layouts="$(join , "${@}")"
   else
-    osk_layouts="$(join , "$*")"
+    osk_layouts="${default_layouts}"
   fi
   snapctl set "layout=${osk_layouts}"
   if [ "$(cat "${osk_layout_file}")" != "${osk_layouts}" ]; then
