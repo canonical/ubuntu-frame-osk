@@ -11,8 +11,6 @@ fi
 
 source "${SNAP}/include/hook-common"
 
-# Ignore validation errors, otherwise install/refresh breaks
-osk_layouts=( $( validate_layouts || /bin/true ) )
-set_layouts "${osk_layouts[@]}"
+set_layouts $( validate_layouts $( snapctl get layout | tr ',' ' ' ) )
 
 [ "$(snapctl get theme)" != "" ]  || snapctl set theme=light

@@ -7,7 +7,13 @@ config_changes=0
 default_theme_option="light"
 osk_gtk_theme_file="$SNAP_DATA/osk-gtk-theme.txt"
 
-osk_layouts=( $( validate_layouts ) )
+osk_layouts=( $( validate_layouts $( snapctl get layout | tr ',' ' ' ) ) )
+invalid_layouts=( $( uniqu $( snapctl get layout | tr ',' ' ' ) "${osk_layouts[@]}" ) )
+if [ ! -z "${invalid_layouts+x}" ]; then
+  echo "Error: Invalid layout IDs: $( join " " ${invalid_layouts[@]} )" >&2
+  echo "       See $SNAP_NAME.list-layouts for a list of valid layouts." >&2
+  exit 1
+fi
 layouts_changed="$( set_layouts "${osk_layouts[@]}" )"
 
 if [ "${layouts_changed}" == "yes" ]; then

@@ -9,20 +9,19 @@ function join {
   echo "$*"
 }
 
-# Loop through list of layouts ensuring entries are valid and comma separated
-# Prints all the valid layouts and returns an error if any was not.
+# Print out non-repeated arguments
+function uniqu {
+  echo "${@}" | tr ' ' '\n' | sort | uniq -u
+}
+
+# Loop through arguments and check that they're valid layouts
+# Prints out all the valid layouts
 function validate_layouts {
-  local error=0
-  for layout in $(snapctl get layout | tr ',' ' '); do
+  for layout in "${@}"; do
     if grep -Fxq "$layout" "$layouts_file"; then
       echo ${layout}
-    else
-      echo "Error: $layout is not a valid layout ID." >&2
-      echo "       See $SNAP_NAME.list-layouts for a list of valid layouts." >&2
-      error=1
     fi
   done
-  return $error
 }
 
 # Prints "yes" or "no" depending on whether the file changed or not
