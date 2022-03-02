@@ -36,6 +36,7 @@ function set_layouts {
   if [ "$(cat "${osk_layout_file}")" != "${osk_layouts}" ]; then
     echo "${osk_layouts}" > "${osk_layout_file}"
     echo yes
+    return
   fi
   echo no
 }
