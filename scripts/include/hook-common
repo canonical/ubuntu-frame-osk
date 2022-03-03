@@ -1,0 +1,42 @@
+default_layouts="us"
+layouts_file="$SNAP/etc/layouts.txt"
+osk_layout_file="$SNAP_DATA/osk-layout.txt"
+
+# Use the first argument to join all the remaining ones
+function join {
+  local IFS="$1"
+  shift
+  echo "$*"
+}
+
+# Print out non-repeated arguments
+function uniqu {
+  echo "${@}" | tr ' ' '\n' | sort | uniq -u
+}
+
+# Loop through arguments and check that they're valid layouts
+# Prints out all the valid layouts
+function validate_layouts {
+  for layout in "${@}"; do
+    if grep -Fxq "$layout" "$layouts_file"; then
+      echo ${layout}
+    fi
+  done
+}
+
+# Prints "yes" or "no" depending on whether the file changed or not
+function set_layouts {
+  local osk_layouts
+  if [ "$#" -gt 0 ]; then
+    osk_layouts="$(join , "${@}")"
+  else
+    osk_layouts="${default_layouts}"
+  fi
+  snapctl set "layout=${osk_layouts}"
+  if [ "$(cat "${osk_layout_file}")" != "${osk_layouts}" ]; then
+    echo "${osk_layouts}" > "${osk_layout_file}"
+    echo yes
+    return
+  fi
+  echo no
+}

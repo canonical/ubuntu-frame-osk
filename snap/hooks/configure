@@ -1,19 +1,22 @@
 #!/bin/bash
 set -euo pipefail
 
+source "${SNAP}/include/hook-common"
+
 config_changes=0
-default_layout_option="us"
 default_theme_option="light"
-osk_layout_file="$SNAP_DATA/osk-layout.txt"
 osk_gtk_theme_file="$SNAP_DATA/osk-gtk-theme.txt"
 
-osk_layout_option="$(snapctl get layout)"
-if [ -z "${osk_layout_option}" ]; then
-  snapctl set "layout=${default_layout_option}"
-  osk_layout_option="${default_layout_option}"
+osk_layouts=( $( validate_layouts $( snapctl get layout | tr ',' ' ' ) ) )
+invalid_layouts=( $( uniqu $( snapctl get layout | tr ',' ' ' ) "${osk_layouts[@]}" ) )
+if [ ! -z "${invalid_layouts+x}" ]; then
+  echo "Error: Invalid layout IDs: $( join " " ${invalid_layouts[@]} )" >&2
+  echo "       See $SNAP_NAME.list-layouts for a list of valid layouts." >&2
+  exit 1
 fi
-if [ "$(cat "${osk_layout_file}")" != "${osk_layout_option}" ]; then
-  echo "${osk_layout_option}" > "${osk_layout_file}"
+layouts_changed="$( set_layouts "${osk_layouts[@]}" )"
+
+if [ "${layouts_changed}" == "yes" ]; then
   let config_changes+=1
 fi
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -x
 
 if [ "$(snapctl get daemon)" = "" ]
@@ -9,5 +9,8 @@ then
   fi
 fi
 
-[ "$(snapctl get layout)" != "" ] || snapctl set layout=us
+source "${SNAP}/include/hook-common"
+
+set_layouts $( validate_layouts $( snapctl get layout | tr ',' ' ' ) )
+
 [ "$(snapctl get theme)" != "" ]  || snapctl set theme=light
