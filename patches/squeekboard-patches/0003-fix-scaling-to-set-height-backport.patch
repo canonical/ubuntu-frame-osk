@@ -1,0 +1,198 @@
+From bc489a50d5e16a4965b19c2e5481b4fecfb32c25 Mon Sep 17 00:00:00 2001
+From: dcz <dorota.czaplejewicz@puri.sm>
+Date: Tue, 5 Apr 2022 11:55:55 +0000
+Subject: [PATCH] Merge branch 'fix' into 'master'
+
+Fix scaling to set height
+
+See merge request World/Phosh/squeekboard!535
+---
+ src/animation.rs             |  3 ++-
+ src/main.rs                  | 28 +++++++++++++++++++++++++---
+ src/server-context-service.c | 13 +++++++------
+ src/state.rs                 | 21 +++++++++++++++------
+ 4 files changed, 49 insertions(+), 16 deletions(-)
+
+diff --git a/src/animation.rs b/src/animation.rs
+index 8a602fb..b13ad37 100644
+--- a/src/animation.rs
++++ b/src/animation.rs
+@@ -6,6 +6,7 @@
+ 
+ use std::time::Duration;
+ 
++use crate::main::PixelSize;
+ use crate::outputs::OutputId;
+ 
+ /// The keyboard should hide after this has elapsed to prevent flickering.
+@@ -16,7 +17,7 @@ pub const HIDING_TIMEOUT: Duration = Duration::from_millis(200);
+ pub enum Outcome {
+     Visible {
+         output: OutputId,
+-        height: u32,
++        height: PixelSize,
+     },
+     Hidden,
+ }
+diff --git a/src/main.rs b/src/main.rs
+index cbd1a11..c32cf66 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -75,7 +75,7 @@ mod c {
+     extern "C" {
+         #[allow(improper_ctypes)]
+         fn init_wayland(wayland: *mut Wayland);
+-        fn server_context_service_update_keyboard(service: *const UIManager, output: WlOutput, height: u32);
++        fn server_context_service_update_keyboard(service: *const UIManager, output: WlOutput, scaled_height: u32);
+         fn server_context_service_real_hide_keyboard(service: *const UIManager);
+         fn server_context_service_set_hint_purpose(service: *const UIManager, hint: u32, purpose: u32);
+         // This should probably only get called from the gtk main loop,
+@@ -151,7 +151,7 @@ mod c {
+     ) {
+         match msg.panel_visibility {
+             Some(PanelCommand::Show { output, height }) => unsafe {
+-                server_context_service_update_keyboard(ui_manager, output.0, height);
++                server_context_service_update_keyboard(ui_manager, output.0, height.as_scaled_ceiling());
+             },
+             Some(PanelCommand::Hide) => unsafe {
+                 server_context_service_real_hide_keyboard(ui_manager);
+@@ -177,11 +177,33 @@ mod c {
+     }
+ }
+ 
++/// Size in pixels that is aware of scaling
++#[derive(Clone, Copy, PartialEq, Debug)]
++pub struct PixelSize {
++    pub pixels: u32,
++    pub scale_factor: u32,
++}
++
++fn div_ceil(a: u32, b: u32) -> u32 {
++    // Given that it's for pixels on a screen, an overflow is unlikely.
++    (a + b - 1) / b
++}
++
++impl PixelSize {
++    pub fn as_scaled_floor(&self) -> u32 {
++        self.pixels / self.scale_factor
++    }
++
++    pub fn as_scaled_ceiling(&self) -> u32 {
++        div_ceil(self.pixels, self.scale_factor)
++    }
++}
++
+ #[derive(Clone, PartialEq, Debug)]
+ pub enum PanelCommand {
+     Show {
+         output: OutputId,
+-        height: u32,
++        height: PixelSize,
+     },
+     Hide,
+ }
+diff --git a/src/server-context-service.c b/src/server-context-service.c
+index aa88ed6..55e7f78 100644
+--- a/src/server-context-service.c
++++ b/src/server-context-service.c
+@@ -139,9 +139,10 @@ server_context_service_real_hide_keyboard (ServerContextService *self)
+ }
+ 
+ // Called from rust
+-/// Updates the type of visibility
++/// Updates the type of visibility.
++/// Height is in scaled units.
+ void
+-server_context_service_update_keyboard (ServerContextService *self, struct wl_output *output, uint32_t height)
++server_context_service_update_keyboard (ServerContextService *self, struct wl_output *output, uint32_t scaled_height)
+ {
+     if (output != self->current_output) {
+         // Recreate on a new output
+@@ -153,11 +154,11 @@ server_context_service_update_keyboard (ServerContextService *self, struct wl_ou
+                      "configured-height", &h,
+                      NULL);
+ 
+-        if ((uint32_t)h != height) {
++        if ((uint32_t)h != scaled_height) {
+ 
+             //TODO: make sure that redrawing happens in the correct place (it doesn't now).
+-            phosh_layer_surface_set_size(self->window, 0, height);
+-            phosh_layer_surface_set_exclusive_zone(self->window, height);
++            phosh_layer_surface_set_size(self->window, 0, scaled_height);
++            phosh_layer_surface_set_exclusive_zone(self->window, scaled_height);
+             phosh_layer_surface_wl_surface_commit(self->window);
+ 
+             self->current_output = output;
+@@ -169,7 +170,7 @@ server_context_service_update_keyboard (ServerContextService *self, struct wl_ou
+     self->current_output = output;
+ 
+     if (!self->window) {
+-        make_window (self, output, height);
++        make_window (self, output, scaled_height);
+     }
+     if (!self->widget) {
+         make_widget (self);
+diff --git a/src/state.rs b/src/state.rs
+index c65033d..5254a94 100644
+--- a/src/state.rs
++++ b/src/state.rs
+@@ -7,7 +7,7 @@
+ 
+ use crate::animation;
+ use crate::imservice::{ ContentHint, ContentPurpose };
+-use crate::main::{ Commands, PanelCommand };
++use crate::main::{ Commands, PanelCommand, PixelSize };
+ use crate::outputs;
+ use crate::outputs::{OutputId, OutputState};
+ use std::cmp;
+@@ -238,14 +238,20 @@ impl Application {
+         }
+     }
+ 
+-    fn get_preferred_height(output: &OutputState) -> Option<u32> {
++    fn get_preferred_height(output: &OutputState) -> Option<PixelSize> {
+         output.get_pixel_size()
+             .map(|px_size| {
+                 let height = {
+                     if px_size.width > px_size.height {
+                         px_size.width / 5
+                     } else {
+-                        if (px_size.width < 540) & (px_size.width > 0) {
++                        let abstract_width
++                            = PixelSize {
++                                scale_factor: output.scale as u32,
++                                pixels: px_size.width,
++                            }
++                            .as_scaled_ceiling();
++                        if (abstract_width < 540) && (px_size.width > 0) {
+                             px_size.width * 7 / 12 // to match 360×210
+                         } else {
+                             // Here we switch to wide layout, less height needed
+@@ -253,7 +259,10 @@ impl Application {
+                         }
+                     }
+                 };
+-                cmp::min(height, px_size.height / 2)
++                PixelSize {
++                    scale_factor: output.scale as u32,
++                    pixels: cmp::min(height, px_size.height / 2),
++                }
+             })
+     }
+ 
+@@ -265,10 +274,10 @@ impl Application {
+                 Some(output) => {
+                     // Hoping that this will get optimized out on branches not using `visible`.
+                     let height = Self::get_preferred_height(self.outputs.get(&output).unwrap())
+-                        .unwrap_or(0);
++                        .unwrap_or(PixelSize{pixels: 0, scale_factor: 1});
+                     // TODO: Instead of setting size to 0 when the output is invalid,
+                     // simply go invisible.
+-                    let visible = animation::Outcome::Visible{output, height};
++                    let visible = animation::Outcome::Visible{ output, height };
+                     
+                     match (self.physical_keyboard, self.visibility_override) {
+                         (_, visibility::State::ForcedHidden) => animation::Outcome::Hidden,
+-- 
+2.35.1
+
