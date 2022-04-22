@@ -139,7 +139,7 @@ parts:
     after: [libfeedback, squeekboard-patches, recipe-version]
     plugin: meson
     source: https://gitlab.gnome.org/World/Phosh/squeekboard.git
-    source-tag: v1.17.0
+    source-tag: v1.17.1
     source-depth: 1
     override-pull: |
       snapcraftctl pull
