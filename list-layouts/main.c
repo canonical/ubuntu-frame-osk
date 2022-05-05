@@ -74,7 +74,7 @@ void print_layouts(GnomeXkbInfo* info, const char* layout_buf) {
     }
     printf(
         "\nRun `snap set %s layout=id1,id2,id3` to set layouts\n",
-        getenv("SNAP_NAME")
+        getenv("SNAP_INSTANCE_NAME")
     );
 }
 
