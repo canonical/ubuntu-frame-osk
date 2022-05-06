@@ -82,8 +82,8 @@ parts:
     source: scripts
 
   anon-shm-preload:
-        source: https://github.com/MirServer/anon-shm-preload.git
-        plugin: cmake
+    source: https://github.com/MirServer/anon-shm-preload.git
+    plugin: cmake
 
   # Some utility scripts for setting up the Wayland environment
   wayland-launch:
