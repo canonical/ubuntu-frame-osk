@@ -85,21 +85,20 @@ parts:
     source: https://github.com/MirServer/anon-shm-preload.git
     plugin: cmake
 
-  # Some utility scripts for setting up the Wayland environment
-  wayland-launch:
+  mir-kiosk-snap-launch:
     plugin: dump
-    source: wayland-launch
-    override-build: |
-      # The plugs needed to run Wayland. (wayland-launch checks them, setup.sh connects them)
-      # You may add further plugs here if you want these options
-      PLUGS="wayland graphics-core20"
-      sed --in-place "s/%PLUGS%/$PLUGS/g" $SNAPCRAFT_PART_BUILD/bin/wayland-launch
-      sed --in-place "s/%PLUGS%/$PLUGS/g" $SNAPCRAFT_PART_BUILD/bin/setup.sh
-      sed --in-place "s/%SNAP%/$SNAPCRAFT_PROJECT_NAME/g" $SNAPCRAFT_PART_BUILD/bin/wayland-launch
-      sed --in-place "s/%SNAP%/$SNAPCRAFT_PROJECT_NAME/g" $SNAPCRAFT_PART_BUILD/bin/setup.sh
-      snapcraftctl build
+    source: https://github.com/MirServer/mir-kiosk-snap-launch.git
+    override-build: $SNAPCRAFT_PART_BUILD/build-with-plugs.sh wayland graphics-core20
     stage-packages:
       - inotify-tools
+    organize:
+      meta/hooks/install: include/hook-install
+    prime:
+      - bin/setup.sh
+      - bin/wayland-launch
+      - include/hook-install
+      - usr/bin/inotifywait
+      - usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libinotifytools.so*
 
   list-layouts:
     source: list-layouts
@@ -203,7 +202,7 @@ parts:
       - fonts-droid-fallback
 
   cleanup:
-    after: [gtk-prep, wayland-launch, fonts]
+    after: [gtk-prep, mir-kiosk-snap-launch, fonts]
     plugin: nil
     build-snaps: [ mesa-core20 ]
     override-prime: |
