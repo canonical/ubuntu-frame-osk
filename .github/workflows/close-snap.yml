@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: Close obsolete channels
-      uses: canonical/actions/close-snap
+      uses: canonical/actions/close-snap@release
       continue-on-error: true
       with:
         channel: edge/pr${{ github.event.number }}
