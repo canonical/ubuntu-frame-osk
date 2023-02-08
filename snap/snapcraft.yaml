@@ -113,6 +113,7 @@ parts:
     # Required by squeekboard because libfeedback-dev isn't in 20.04
     plugin: meson
     source: https://source.puri.sm/Librem5/feedbackd.git
+    source-tag: v0.0.1
     source-depth: 1
     meson-parameters: [--prefix, /usr]
     build-packages:
