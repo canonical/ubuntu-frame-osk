@@ -2,7 +2,7 @@ name: ubuntu-frame-osk
 summary: On-screen keyboard for Ubuntu Frame, based on Squeekboard
 description: This snap contains the Wayland on-screen keyboard Squeekboard, modified and packaged such that it can run on Ubuntu Frame.
 confinement: strict
-base: core20
+base: core22
 adopt-info: squeekboard
 license: GPL-3.0
 compression: lzo
@@ -14,31 +14,24 @@ architectures:
   - build-on: armhf
 
 plugs:
-  graphics-core20:
+  graphics-core22:
     interface: content
     target: $SNAP/graphics
-    default-provider: mesa-core20
+    default-provider: mesa-core22/edge
 
 environment:
-  # Graphics from graphics-core20
-  LD_LIBRARY_PATH:    $SNAP/graphics/lib
-  LIBGL_DRIVERS_PATH: $SNAP/graphics/dri
-  LIBVA_DRIVERS_PATH: $SNAP/graphics/dri
-  __EGL_VENDOR_LIBRARY_DIRS: $SNAP/graphics/glvnd/egl_vendor.d
   # XKB config from snap
   XKB_CONFIG_ROOT: $SNAP/usr/share/X11/xkb
 
 layout:
-  /usr/share/libdrm:  # Needed by mesa-core20 on AMD GPUs
-    bind: $SNAP/graphics/libdrm
-  /usr/share/drirc.d:  # Used by mesa-core20 for app specific workarounds
+  /usr/share/drirc.d:  # Used by mesa-core22 for app specific workarounds
     bind: $SNAP/graphics/drirc.d
   /usr/share/icons:
     bind: $SNAP/usr/share/icons
   /usr/share/themes:
     bind: $SNAP/usr/share/themes
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0:
-    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0
+  /usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0
   /usr/share/mime:
     bind: $SNAP/usr/share/mime
   /usr/share/fonts:
@@ -52,7 +45,11 @@ layout:
 
 apps:
   ubuntu-frame-osk:
-    command-chain: &_command-chain [bin/wayland-launch, bin/run-user, bin/anon-shm-preload]
+    command-chain: &_command-chain
+      - bin/wayland-launch
+      - bin/run-user
+      - bin/anon-shm-preload
+      - bin/graphics-core22-wrapper
     command: &_command usr/bin/squeekboard
     plugs: &_plugs [wayland]
 
@@ -68,15 +65,6 @@ apps:
     command: usr/bin/list-layouts
 
 parts:
-  recipe-version:
-    plugin: nil
-    source: .
-    source-type: git
-    override-build: |
-      git rev-list --count HEAD > $SNAPCRAFT_PART_INSTALL/recipe-version
-    prime:
-      - -recipe-version
-
   scripts:
     plugin: dump
     source: scripts
@@ -92,12 +80,12 @@ parts:
     override-build: |
       # The plugs needed to run Wayland. (wayland-launch checks them, setup.sh connects them)
       # You may add further plugs here if you want these options
-      PLUGS="wayland graphics-core20"
-      sed --in-place "s/%PLUGS%/$PLUGS/g" $SNAPCRAFT_PART_BUILD/bin/wayland-launch
-      sed --in-place "s/%PLUGS%/$PLUGS/g" $SNAPCRAFT_PART_BUILD/bin/setup.sh
-      sed --in-place "s/%SNAP%/$SNAPCRAFT_PROJECT_NAME/g" $SNAPCRAFT_PART_BUILD/bin/wayland-launch
-      sed --in-place "s/%SNAP%/$SNAPCRAFT_PROJECT_NAME/g" $SNAPCRAFT_PART_BUILD/bin/setup.sh
-      snapcraftctl build
+      PLUGS="wayland graphics-core22"
+      sed --in-place "s/%PLUGS%/$PLUGS/g" $CRAFT_PART_BUILD/bin/wayland-launch
+      sed --in-place "s/%PLUGS%/$PLUGS/g" $CRAFT_PART_BUILD/bin/setup.sh
+      sed --in-place "s/%SNAP%/$CRAFT_PROJECT_NAME/g" $CRAFT_PART_BUILD/bin/wayland-launch
+      sed --in-place "s/%SNAP%/$CRAFT_PROJECT_NAME/g" $CRAFT_PART_BUILD/bin/setup.sh
+      craftctl default
     stage-packages:
       - inotify-tools
 
@@ -105,30 +93,10 @@ parts:
     source: list-layouts
     plugin: meson
     build-packages:
+      - meson
       - libgnome-desktop-3-dev
     stage-packages:
       - libgnome-desktop-3-19
-
-  libfeedback:
-    # Required by squeekboard because libfeedback-dev isn't in 20.04
-    plugin: meson
-    source: https://source.puri.sm/Librem5/feedbackd.git
-    source-tag: v0.0.1
-    source-depth: 1
-    meson-parameters: [--prefix, /usr]
-    build-packages:
-      - dbus
-      - libgirepository1.0-dev
-      - libgudev-1.0-dev
-      - libgsound-dev
-      - libjson-glib-dev
-      - valac
-      - libglib2.0-dev
-    stage-packages:
-      - libgudev-1.0-0
-      - libgsound0
-      - libjson-glib-1.0-0
-      - libglib2.0-0
 
   squeekboard-patches:
     plugin: dump
@@ -137,34 +105,37 @@ parts:
       - -squeekboard-patches
 
   squeekboard:
-    after: [libfeedback, squeekboard-patches, recipe-version]
+    after: [squeekboard-patches]
     plugin: meson
     source: https://gitlab.gnome.org/World/Phosh/squeekboard.git
     source-tag: v1.17.1
     source-depth: 1
     override-pull: |
-      snapcraftctl pull
-      git apply ${SNAPCRAFT_STAGE}/squeekboard-patches/*
-      recipe_version=`cat $SNAPCRAFT_STAGE/recipe-version`
-      snapcraftctl set-version $recipe_version-squeekboard-`git describe`
+      craftctl default
+      recipe_version=`git -C ${CRAFT_PROJECT_DIR} rev-list --count HEAD`
+      craftctl set version=$recipe_version-squeekboard-`git -C ${CRAFT_PART_SRC} describe`
     meson-parameters: [--prefix, /usr, -Dstrict=false, -Dbuildtype=release]
     override-build: |
-      snapcraftctl build
+      git -C ${CRAFT_PART_SRC} apply ${CRAFT_STAGE}/squeekboard-patches/*
+      craftctl default
       # Generate a list of keyboard layouts
-      mkdir -p ${SNAPCRAFT_PART_INSTALL}/etc
-      ls ${SNAPCRAFT_PART_SRC}/data/keyboards/ \
+      mkdir -p ${CRAFT_PART_INSTALL}/etc
+      ls ${CRAFT_PART_SRC}/data/keyboards/ \
         | grep -Po '^[a-zA-Z\+]+(?=.*\.yaml$)' \
         | sort | uniq \
-        >${SNAPCRAFT_PART_INSTALL}/etc/layouts.txt
+        >${CRAFT_PART_INSTALL}/etc/layouts.txt
     build-packages:
       - cargo
+      - meson
       - wayland-protocols
+      - libfeedback-dev
       - libwayland-dev
       - libglib2.0-dev
       - libgnome-desktop-3-dev
       - libgtk-3-dev
       - gettext
     stage-packages:
+      - libfeedback-0.0-0
       - libglib2.0-0
       - libgnome-desktop-3-19
       - libgtk-3-0
@@ -174,9 +145,10 @@ parts:
       - -usr/bin/squeekboard-test-layout
 
   gtk-prep:
-    after: [squeekboard, libfeedback]
+    after: [squeekboard]
     plugin: nil
     build-packages:
+      - librsvg2-2
       - libgdk-pixbuf2.0-0
       - shared-mime-info
     stage-packages:
@@ -185,16 +157,16 @@ parts:
       - libglib2.0-bin
     override-build: |
       # Update mime database
-      update-mime-database ${SNAPCRAFT_PART_INSTALL}/usr/share/mime
+      update-mime-database ${CRAFT_PART_INSTALL}/usr/share/mime
     override-prime: |
-      snapcraftctl prime
+      craftctl default
       # Compile the gsettings schemas
-      /usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/glib-2.0/glib-compile-schemas ${SNAPCRAFT_PRIME}/usr/share/glib-2.0/schemas
+      /usr/lib/${CRAFT_ARCH_TRIPLET}/glib-2.0/glib-compile-schemas ${CRAFT_PRIME}/usr/share/glib-2.0/schemas
       # Index the pixbuf loaders
-      LOADERS_PATH=$(echo ${SNAPCRAFT_PRIME}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/*/loaders)
-      QUERY_LOADERS=/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders
+      LOADERS_PATH=$(echo ${CRAFT_PRIME}/usr/lib/${CRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/*/loaders)
+      QUERY_LOADERS=/usr/lib/${CRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders
       GDK_PIXBUF_MODULEDIR=${LOADERS_PATH} ${QUERY_LOADERS} > ${LOADERS_PATH}/../loaders.cache
-      sed s!$SNAPCRAFT_PRIME!!g --in-place ${LOADERS_PATH}/../loaders.cache
+      sed s!$CRAFT_PRIME!!g --in-place ${LOADERS_PATH}/../loaders.cache
 
   fonts:
     plugin: nil
@@ -203,22 +175,13 @@ parts:
       - fonts-freefont-ttf
       - fonts-droid-fallback
 
-  cleanup:
+  graphics-core22:
     after: [gtk-prep, wayland-launch, fonts]
-    plugin: nil
-    build-snaps: [ mesa-core20 ]
+    source: https://github.com/MirServer/graphics-core22.git
+    plugin: dump
     override-prime: |
-      set -eux
-      cd /snap/mesa-core20/current/egl/lib
-      find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/{} \;
-      rm -fr "$SNAPCRAFT_PRIME/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri"
-      cd "$SNAPCRAFT_PRIME/usr/share"
-      rm -rf bug drirc.d glvnd libdrm lintian man
-
-  more-cleanup:
-    after: [cleanup]
-    plugin: nil
-    override-prime: |
-      set -eux
-      cd "$SNAPCRAFT_PRIME/usr/share"
-      rm -rf alsa dbus-1 help apport doc doc-base pkgconfig thumbnailers bash-completion feedbackd gir-1.0 libthai sounds
+      craftctl default
+      ${CRAFT_PART_SRC}/bin/graphics-core22-cleanup mesa-core22
+      rm -rf ${CRAFT_PRIME}/{alsa,dbus-1,help,apport,doc,doc-base,pkgconfig,thumbnailers,bash-completion,feedbackd,gir-1.0,libthai,sounds}
+    prime:
+      - bin/graphics-core22-wrapper
