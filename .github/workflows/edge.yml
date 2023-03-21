@@ -27,7 +27,7 @@ jobs:
       run: |
         # bring any "next" changes in, except for the unpinning
         git fetch origin edge
-        git cherry-pick HEAD..origin/edge^
+        [ -z "$( git log HEAD..origin/edge^)" ] || git cherry-pick HEAD..origin/edge^
 
         # unpin dependencies
         sed -i 's/^grade: .*/grade: devel/' snap/snapcraft.yaml
