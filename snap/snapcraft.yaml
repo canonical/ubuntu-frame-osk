@@ -125,6 +125,7 @@ parts:
       - cargo
       - meson
       - wayland-protocols
+      - libbsd-dev
       - libfeedback-dev
       - libwayland-dev
       - libglib2.0-dev
@@ -132,6 +133,7 @@ parts:
       - libgtk-3-dev
       - gettext
     stage-packages:
+      - libbsd0
       - libfeedback-0.0-0
       - libglib2.0-0t64
       - libgnome-desktop-3-20t64
