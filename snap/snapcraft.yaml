@@ -25,19 +25,19 @@ environment:
 
 layout:
   /usr/share/drirc.d:  # Used by mesa-core22 for app specific workarounds
-    bind: $SNAP/graphics/drirc.d
+    symlink: $SNAP/graphics/drirc.d
   /usr/share/icons:
     bind: $SNAP/usr/share/icons
   /usr/share/themes:
-    bind: $SNAP/usr/share/themes
+    symlink: $SNAP/usr/share/themes
   /usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0:
-    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0
+    symlink: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0
   /usr/share/mime:
-    bind: $SNAP/usr/share/mime
+    symlink: $SNAP/usr/share/mime
   /usr/share/fonts:
     bind: $SNAP/usr/share/fonts
   /usr/share/xml:
-    bind: $SNAP/usr/share/xml
+    symlink: $SNAP/usr/share/xml
   /etc/fonts: # Without this emojis don't look right
     bind: $SNAP/etc/fonts
   /usr/share/glib-2.0:
