@@ -108,7 +108,7 @@ parts:
     after: [squeekboard-patches]
     plugin: meson
     source: https://gitlab.gnome.org/World/Phosh/squeekboard.git
-    source-tag: v1.17.1
+    source-tag: v1.21.0
     source-depth: 1
     override-pull: |
       craftctl default
