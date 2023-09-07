@@ -20,6 +20,7 @@ plugs:
     default-provider: mesa-core22
 
 environment:
+  XDG_DATA_DIRS: $SNAP/usr/share:$SNAP/usr/local/share
   # XKB config from snap
   XKB_CONFIG_ROOT: $SNAP/usr/share/X11/xkb
 
