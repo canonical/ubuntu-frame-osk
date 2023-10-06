@@ -18,8 +18,12 @@ plugs:
     interface: content
     target: $SNAP/graphics
     default-provider: mesa-core22
+  keyboard-layouts:
+    interface: content
+    target: $SNAP_DATA/.share/squeekboard
 
 environment:
+  XDG_DATA_HOME: $SNAP_DATA/.share
   XDG_DATA_DIRS: $SNAP/usr/share:$SNAP/usr/local/share
   # XKB config from snap
   XKB_CONFIG_ROOT: $SNAP/usr/share/X11/xkb
