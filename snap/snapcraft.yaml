@@ -104,6 +104,7 @@ parts:
     after: [squeekboard-patches]
     plugin: meson
     source: https://git.launchpad.net/ubuntu/+source/squeekboard
+    source-type: git
     source-branch: applied/ubuntu/jammy
     source-depth: 1
     override-pull: |
