@@ -105,7 +105,7 @@ parts:
     plugin: meson
     source: https://git.launchpad.net/ubuntu/+source/squeekboard
     source-type: git
-    source-branch: applied/ubuntu/jammy
+    source-branch: applied/ubuntu/jammy-devel
     source-depth: 1
     override-pull: |
       craftctl default
