@@ -103,13 +103,14 @@ parts:
   squeekboard:
     after: [squeekboard-patches]
     plugin: meson
-    source: https://gitlab.gnome.org/World/Phosh/squeekboard.git
-    source-tag: v1.17.1
+    source: https://git.launchpad.net/ubuntu/+source/squeekboard
+    source-type: git
+    source-branch: applied/ubuntu/jammy-devel
     source-depth: 1
     override-pull: |
       craftctl default
       recipe_version=`git -C ${CRAFT_PROJECT_DIR} rev-list --count HEAD`
-      craftctl set version=$recipe_version-squeekboard-`git -C ${CRAFT_PART_SRC} describe`
+      craftctl set version=$recipe_version-sqbd$( dpkg-parsechangelog --file $CRAFT_PART_SRC/debian/changelog --show-field Version )
     meson-parameters: [--prefix, /usr, -Dstrict=false, -Dbuildtype=release]
     override-build: |
       git -C ${CRAFT_PART_SRC} apply ${CRAFT_STAGE}/squeekboard-patches/*
