@@ -89,15 +89,6 @@ parts:
   wayland-launch:
     plugin: dump
     source: wayland-launch
-    override-build: |
-      # The plugs needed to run Wayland. (wayland-launch checks them, setup.sh connects them)
-      # You may add further plugs here if you want these options
-      PLUGS="wayland graphics-core20"
-      sed --in-place "s/%PLUGS%/$PLUGS/g" $SNAPCRAFT_PART_BUILD/bin/wayland-launch
-      sed --in-place "s/%PLUGS%/$PLUGS/g" $SNAPCRAFT_PART_BUILD/bin/setup.sh
-      sed --in-place "s/%SNAP%/$SNAPCRAFT_PROJECT_NAME/g" $SNAPCRAFT_PART_BUILD/bin/wayland-launch
-      sed --in-place "s/%SNAP%/$SNAPCRAFT_PROJECT_NAME/g" $SNAPCRAFT_PART_BUILD/bin/setup.sh
-      snapcraftctl build
     stage-packages:
       - inotify-tools
 
