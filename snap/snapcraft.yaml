@@ -104,7 +104,7 @@ parts:
     after: [squeekboard-patches]
     plugin: meson
     source: https://gitlab.gnome.org/World/Phosh/squeekboard.git
-    source-tag: v1.17.1
+    source-tag: v1.24.0
     source-depth: 1
     override-pull: |
       craftctl default
@@ -124,6 +124,7 @@ parts:
       - cargo
       - meson
       - wayland-protocols
+      - libbsd-dev
       - libfeedback-dev
       - libwayland-dev
       - libglib2.0-dev
@@ -131,6 +132,8 @@ parts:
       - libgtk-3-dev
       - gettext
     stage-packages:
+      - libbsd0
+      - libgtk2.0-0
       - libfeedback-0.0-0
       - libglib2.0-0
       - libgnome-desktop-3-19
