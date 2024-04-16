@@ -2,7 +2,7 @@ name: ubuntu-frame-osk
 summary: On-screen keyboard for Ubuntu Frame, based on Squeekboard
 description: This snap contains the Wayland on-screen keyboard Squeekboard, modified and packaged such that it can run on Ubuntu Frame.
 confinement: strict
-base: core22
+base: core24
 adopt-info: squeekboard
 license: GPL-3.0
 compression: lzo
@@ -14,10 +14,10 @@ architectures:
   - build-on: armhf
 
 plugs:
-  graphics-core22:
+  graphics-core:
     interface: content
     target: $SNAP/graphics
-    default-provider: mesa-core22
+    default-provider: mesa-core24
   squeekboard-layouts:
     interface: content
     target: $SNAP_COMMON/squeekboard/keyboards
@@ -29,7 +29,7 @@ environment:
   XKB_CONFIG_ROOT: $SNAP/usr/share/X11/xkb
 
 layout:
-  /usr/share/drirc.d:  # Used by mesa-core22 for app specific workarounds
+  /usr/share/drirc.d:  # Used by mesa-core24 for app specific workarounds
     symlink: $SNAP/graphics/drirc.d
   /usr/share/icons:
     bind: $SNAP/usr/share/icons
@@ -54,7 +54,7 @@ apps:
       - bin/wayland-launch
       - bin/run-user
       - bin/anon-shm-preload
-      - bin/graphics-core22-wrapper
+      - bin/graphics-core24-wrapper
     command: &_command usr/bin/squeekboard
     plugs: &_plugs [wayland]
 
@@ -171,13 +171,13 @@ parts:
       - fonts-freefont-ttf
       - fonts-droid-fallback
 
-  graphics-core22:
+  graphics-core:
     after: [gtk-prep, wayland-launch, fonts]
     source: https://github.com/canonical/graphics-core.git
     plugin: dump
     override-prime: |
       craftctl default
-      ${CRAFT_PART_SRC}/bin/graphics-core22-cleanup mesa-core22
+      ${CRAFT_PART_SRC}/bin/graphics-core24-cleanup mesa-core24
       rm -rf ${CRAFT_PRIME}/{alsa,dbus-1,help,apport,doc,doc-base,pkgconfig,thumbnailers,bash-completion,feedbackd,gir-1.0,libthai,sounds}
     prime:
-      - bin/graphics-core22-wrapper
+      - bin/graphics-core24-wrapper
