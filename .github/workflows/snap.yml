@@ -12,6 +12,14 @@ jobs:
 
     timeout-minutes: 30
 
+    strategy:
+      matrix:
+        platform:
+        - amd64
+        - armhf
+        - arm64
+      fail-fast: false
+
     steps:
     - name: Check out code
       uses: actions/checkout@v4
@@ -21,6 +29,9 @@ jobs:
     - name: Build and publish the snap
       uses: canonical/actions/build-snap@release
       with:
+        architecture: ${{ matrix.platform }}
         snapcraft-token: ${{ secrets.SNAPCRAFT_TOKEN }}
+        launchpad-credentials: ${{ secrets.LAUNCHPAD_CREDENTIALS }}
+        launchpad-accept-public-upload: true
         publish: ${{ github.event_name == 'pull_request' && github.repository == github.event.pull_request.head.repo.full_name }}
         publish-channel: 22/edge/pr${{ github.event.number }}
