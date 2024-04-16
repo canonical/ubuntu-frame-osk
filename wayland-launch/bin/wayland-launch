@@ -1,10 +1,10 @@
 #!/bin/sh
 set -e
 
-for PLUG in %PLUGS%; do
+for PLUG in wayland graphics-core20; do
   if ! snapctl is-connected ${PLUG}
   then
-    echo "WARNING: ${PLUG} interface not connected! Please run: /snap/%SNAP%/current/bin/setup.sh"
+    echo "WARNING: ${PLUG} interface not connected! Please run: /snap/${SNAP_INSTANCE_NAME}/current/bin/setup.sh"
   fi
 done
 
