@@ -92,7 +92,7 @@ parts:
       - meson
       - libgnome-desktop-3-dev
     stage-packages:
-      - libgnome-desktop-3-19
+      - libgnome-desktop-3-20t64
 
   squeekboard-patches:
     plugin: dump
@@ -133,7 +133,7 @@ parts:
     stage-packages:
       - libfeedback-0.0-0
       - libglib2.0-0
-      - libgnome-desktop-3-19
+      - libgnome-desktop-3-20t64
       - libgtk-3-0
       - yaru-theme-gtk
       - iso-codes
