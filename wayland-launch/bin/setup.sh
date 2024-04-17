@@ -24,7 +24,7 @@ snap_connect_harder() {
   echo "Warning: Failed to connect '$1'. Please connect manually, available providers are:\n$available_providers"
 }
 
-for PLUG in wayland graphics-core22; do
+for PLUG in wayland gpu-2404; do
   if ! snap connections ${SNAP_INSTANCE_NAME} | grep --quiet "^.*${SNAP_INSTANCE_NAME}:${PLUG}.*${PLUG}.*$"; then
     sudo snap connect "${SNAP_INSTANCE_NAME}:${PLUG}" 2> /dev/null || snap_connect_harder ${PLUG}
   fi
