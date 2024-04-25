@@ -132,9 +132,9 @@ parts:
       - gettext
     stage-packages:
       - libfeedback-0.0-0
-      - libglib2.0-0
+      - libglib2.0-0t64
       - libgnome-desktop-3-20t64
-      - libgtk-3-0
+      - libgtk-3-0t64
       - yaru-theme-gtk
       - iso-codes
     prime:
