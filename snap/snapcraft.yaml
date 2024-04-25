@@ -42,7 +42,7 @@ layout:
   /usr/share/fonts:
     bind: $SNAP/usr/share/fonts
   /usr/share/xml:
-    symlink: $SNAP/usr/share/xml
+    bind: $SNAP/usr/share/xml
   /etc/fonts: # Without this emojis don't look right
     bind: $SNAP/etc/fonts
   /usr/share/glib-2.0:
