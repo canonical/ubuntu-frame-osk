@@ -137,6 +137,7 @@ parts:
       - libgtk-3-0t64
       - yaru-theme-gtk
       - iso-codes
+      - xkb-data
     prime:
       - -usr/bin/squeekboard-test-layout
 
