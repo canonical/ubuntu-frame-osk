@@ -8,10 +8,10 @@ license: GPL-3.0
 compression: lzo
 grade: stable
 
-architectures:
-  - build-on: amd64
-  - build-on: arm64
-  - build-on: armhf
+platforms:
+  amd64:
+  arm64:
+  armhf:
 
 plugs:
   gpu-2404:
