@@ -2,22 +2,22 @@ name: ubuntu-frame-osk
 summary: On-screen keyboard for Ubuntu Frame, based on Squeekboard
 description: This snap contains the Wayland on-screen keyboard Squeekboard, modified and packaged such that it can run on Ubuntu Frame.
 confinement: strict
-base: core22
+base: core24
 adopt-info: squeekboard
 license: GPL-3.0
 compression: lzo
 grade: stable
 
-architectures:
-  - build-on: amd64
-  - build-on: arm64
-  - build-on: armhf
+platforms:
+  amd64:
+  arm64:
+  armhf:
 
 plugs:
-  graphics-core22:
+  gpu-2404:
     interface: content
-    target: $SNAP/graphics
-    default-provider: mesa-core22
+    target: $SNAP/gpu-2404
+    default-provider: mesa-2404
   squeekboard-layouts:
     interface: content
     target: $SNAP_COMMON/squeekboard/keyboards
@@ -29,8 +29,8 @@ environment:
   XKB_CONFIG_ROOT: $SNAP/usr/share/X11/xkb
 
 layout:
-  /usr/share/drirc.d:  # Used by mesa-core22 for app specific workarounds
-    symlink: $SNAP/graphics/drirc.d
+  /usr/share/drirc.d:  # Used by mesa-2404 for app specific workarounds
+    symlink: $SNAP/gpu-2404/drirc.d
   /usr/share/icons:
     bind: $SNAP/usr/share/icons
   /usr/share/themes:
@@ -42,7 +42,7 @@ layout:
   /usr/share/fonts:
     bind: $SNAP/usr/share/fonts
   /usr/share/xml:
-    symlink: $SNAP/usr/share/xml
+    bind: $SNAP/usr/share/xml
   /etc/fonts: # Without this emojis don't look right
     bind: $SNAP/etc/fonts
   /usr/share/glib-2.0:
@@ -54,7 +54,7 @@ apps:
       - bin/wayland-launch
       - bin/run-user
       - bin/anon-shm-preload
-      - bin/graphics-core22-wrapper
+      - bin/gpu-2404-wrapper
     command: &_command usr/bin/squeekboard
     plugs: &_plugs [wayland]
 
@@ -75,7 +75,7 @@ parts:
     source: scripts
 
   anon-shm-preload:
-        source: https://github.com/MirServer/anon-shm-preload.git
+        source: https://github.com/canonical/anon-shm-preload.git
         plugin: cmake
 
   # Some utility scripts for setting up the Wayland environment
@@ -92,7 +92,7 @@ parts:
       - meson
       - libgnome-desktop-3-dev
     stage-packages:
-      - libgnome-desktop-3-19
+      - libgnome-desktop-3-20t64
 
   squeekboard-patches:
     plugin: dump
@@ -132,11 +132,12 @@ parts:
       - gettext
     stage-packages:
       - libfeedback-0.0-0
-      - libglib2.0-0
-      - libgnome-desktop-3-19
-      - libgtk-3-0
+      - libglib2.0-0t64
+      - libgnome-desktop-3-20t64
+      - libgtk-3-0t64
       - yaru-theme-gtk
       - iso-codes
+      - xkb-data
     prime:
       - -usr/bin/squeekboard-test-layout
 
@@ -171,13 +172,13 @@ parts:
       - fonts-freefont-ttf
       - fonts-droid-fallback
 
-  graphics-core22:
+  gpu-snap:
     after: [gtk-prep, wayland-launch, fonts]
-    source: https://github.com/MirServer/graphics-core22.git
+    source: https://github.com/canonical/gpu-snap.git
     plugin: dump
     override-prime: |
       craftctl default
-      ${CRAFT_PART_SRC}/bin/graphics-core22-cleanup mesa-core22
+      ${CRAFT_PART_SRC}/bin/gpu-2404-cleanup mesa-2404
       rm -rf ${CRAFT_PRIME}/{alsa,dbus-1,help,apport,doc,doc-base,pkgconfig,thumbnailers,bash-completion,feedbackd,gir-1.0,libthai,sounds}
     prime:
-      - bin/graphics-core22-wrapper
+      - bin/gpu-2404-wrapper
