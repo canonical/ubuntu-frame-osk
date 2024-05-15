@@ -1,0 +1,21 @@
+diff --git a/src/state.rs b/src/state.rs
+index 775194e..556767b 100644
+--- a/src/state.rs
++++ b/src/state.rs
+@@ -415,6 +415,16 @@ Outcome:
+                         ideal_height_px,
+                         (height_as_widths * px_size.width as i32).ceil() as u32,
+                     );
++                    
++                let (arrangement, height) = {
++                    if px_size.width > px_size.height {(
++                        ArrangementKind::Wide,
++                        px_size.height / 3
++                    )} else {(
++                        ArrangementKind::Base,
++                        px_size.height / 4
++                    )}
++                };
+ 
+                 (
+                     PixelSize {
