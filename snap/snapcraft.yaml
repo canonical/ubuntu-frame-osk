@@ -138,6 +138,7 @@ parts:
       git apply ${SNAPCRAFT_STAGE}/squeekboard-patches/*
       recipe_version=`cat $SNAPCRAFT_STAGE/recipe-version`
       snapcraftctl set-version $recipe_version-squeekboard-`git describe`
+    meson-version: 1.4.2  # https://bugs.launchpad.net/snapcraft/+bug/2075493
     meson-parameters: [--prefix, /usr, -Dstrict=false, -Dbuildtype=release]
     override-build: |
       snapcraftctl build
