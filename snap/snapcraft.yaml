@@ -27,6 +27,8 @@ environment:
   XDG_DATA_DIRS: $SNAP/usr/share:$SNAP/usr/local/share
   # XKB config from snap
   XKB_CONFIG_ROOT: $SNAP/usr/share/X11/xkb
+  FONTCONFIG_PATH: $SNAP/etc/fonts
+  FONTCONFIG_FILE: $SNAP/etc/fonts/fonts.conf
 
 layout:
   /usr/share/drirc.d:  # Used by mesa-2404 for app specific workarounds
@@ -43,8 +45,6 @@ layout:
     bind: $SNAP/usr/share/fonts
   /usr/share/xml:
     bind: $SNAP/usr/share/xml
-  /etc/fonts: # Without this emojis don't look right
-    bind: $SNAP/etc/fonts
   /usr/share/glib-2.0:
     bind: $SNAP/usr/share/glib-2.0
 
