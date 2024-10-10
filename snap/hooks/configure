@@ -25,14 +25,37 @@ if [ -z "${osk_theme_option}" ]; then
   snapctl set "theme=${default_theme_option}"
   osk_theme_option="${default_theme_option}"
 fi
-case "${osk_theme_option}" in
-  light)  osk_gtk_theme='Yaru-light';;
-  dark)   osk_gtk_theme='Yaru-dark';;
-  *)      echo "Error: invalid theme option ${osk_theme_option}, should be 'light' or 'dark'" >&2
-          exit 1;;
-esac
-if [ "$(cat "${osk_gtk_theme_file}")" != "${osk_gtk_theme}" ]; then
-  echo "${osk_gtk_theme}" > "${osk_gtk_theme_file}"
+
+declare -A themes=(
+  [light]=Yaru
+  [dark]=Yaru-dark
+  [bark]=Yaru-bark
+  [bark-dark]=Yaru-bark-dark
+  [blue]=Yaru-blue
+  [blue-dark]=Yaru-blue-dark
+  [dark]=Yaru-dark
+  [magenta]=Yaru-magenta
+  [magenta-dark]=Yaru-magenta-dark
+  [olive]=Yaru-olive
+  [olive-dark]=Yaru-olive-dark
+  [prussiangreen]=Yaru-prussiangreen
+  [prussiangreen-dark]=Yaru-prussiangreen-dark
+  [purple]=Yaru-purple
+  [purple-dark]=Yaru-purple-dark
+  [red]=Yaru-red
+  [red-dark]=Yaru-red-dark
+  [sage]=Yaru-sage
+  [sage-dark]=Yaru-sage-dark
+  [viridian]=Yaru-viridian
+  [viridian-dark]=Yaru-viridian-dark
+)
+
+if [[ -z "${themes[${osk_theme_option}]:-}" ]]; then
+  echo "Error: invalid theme option ${osk_theme_option}, should be one of" "${!themes[@]}" >&2
+  exit 1
+fi
+if [ "$(cat "${osk_gtk_theme_file}")" != "${themes[${osk_theme_option}]}" ]; then
+  echo "${themes[${osk_theme_option}]}" > "${osk_gtk_theme_file}"
   let config_changes+=1
 fi
 
