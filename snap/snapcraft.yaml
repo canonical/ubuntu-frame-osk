@@ -135,7 +135,6 @@ parts:
       - gettext
     stage-packages:
       - libbsd0
-      - libgtk2.0-0
       - libfeedback-0.0-0
       - libglib2.0-0t64
       - libgnome-desktop-3-20t64
