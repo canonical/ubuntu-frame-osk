@@ -111,7 +111,13 @@ parts:
     override-pull: |
       craftctl default
       recipe_version=`git -C ${CRAFT_PROJECT_DIR} rev-list --count HEAD`
-      craftctl set version=$recipe_version-sb1.43.1-1
+      sb_version=$(
+        dpkg-parsechangelog \
+          --file debian/changelog \
+          --show-field Version \
+        | sed -rne 's/(^[0-9.]+).*/\1/p'
+      )
+      craftctl set version=$recipe_version-sb$sb_version
     meson-parameters: [--prefix, /usr, -Dstrict=false, -Dbuildtype=release]
     override-build: |
       git -C ${CRAFT_PART_SRC} apply ${CRAFT_STAGE}/squeekboard-patches/*
