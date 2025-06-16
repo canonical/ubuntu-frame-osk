@@ -6,7 +6,7 @@ base: core24
 adopt-info: squeekboard
 license: GPL-3.0
 compression: lzo
-grade: stable
+grade: devel
 
 platforms:
   amd64:
@@ -106,7 +106,6 @@ parts:
     plugin: meson
     source: https://git.launchpad.net/ubuntu/+source/squeekboard
     source-type: git
-    source-tag: applied/1.43.1-1
     source-depth: 1
     override-pull: |
       craftctl default
