@@ -3,7 +3,7 @@ name: Refresh `edge`
 on:
   push:
     branches:
-    - main
+    - core26
   workflow_dispatch:
 
 jobs:
